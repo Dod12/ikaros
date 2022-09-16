@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<class name="LidarSensor" description="Lidar sensor module">
+
+	<description type="text">
+		Module for interacting with the RPLIDAR-A3 sensor.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="LidarSensor"
+			name="LidarSensor"
+			serial_port="/dev/tty.usbserial-0001"
+			baud_rate="256000"
+		/>
+	</example>
+
+	<parameter name="serial_port" type="string" description="Serial port to use for communication with LIDAR sensor" />
+	<parameter name="baud_rate" type="int" default="256000" description="Baud rate" />
+
+	<output name="X_POSITION" description="Array of x-positions of objects detected by the lidar sensor" size="8192" />
+	<output name="Y_POSITION" description="Array of y-positions of objects detected by the lidar sensor" size="8192" />
+	<output name="GRID" description="Matrix of positions of objects detected by the lidar sensor" size_x="256" size_y="256	"/>
+
+	<link class="LidarSensor" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>LidarSensor.h</file>
+   		<file>LidarSensor.cc</file>
+   		<file>LidarSensor.ikc</file>
+   </files>
+
+</class>
