@@ -1,6 +1,8 @@
-# Folders
-
+# Folders #
+###########
 /build/
+/cmake-build*/
+
 # Compiled source #
 ###################
 *.com
@@ -58,3 +60,4 @@ Thumbs.db
 
 # Other
 .vscode
+.idea
