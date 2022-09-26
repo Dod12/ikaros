@@ -26,24 +26,18 @@
 
 #include "IKAROS.h"
 
-#include <rplidar.h>
-
-#define N_LIDAR_SAMPLES 8192
-
-using namespace sl;
-
-class LidarSensor: public Module
+class OccupancyMap: public Module
 {
 public:
-    static Module * Create(Parameter * p) { return new LidarSensor(p); }
+    static Module * Create(Parameter * p) { return new OccupancyMap(p); }
 
-    LidarSensor(Parameter * p) : Module(p) {}
-    ~LidarSensor();
+    OccupancyMap(Parameter * p) : Module(p) {}
+    ~OccupancyMap();
 
     void 		Init();
     void 		Tick();
 
-    // Output arrays
+    // Input arrays
 
     float * r_array;
     int r_array_size;
@@ -51,20 +45,18 @@ public:
     float * theta_array;
     int theta_array_size;
 
+    // Output arrays
+
+    float ** grid_matrix;
+    int grid_matrix_size_x;
+    int grid_matrix_size_y;
+
     // Parameters
 
-    int baud_rate;
-    std::string serial_port = {};
+    float max_distance;
+    float prior, l_prior, empty_probability, l_empty, occupied_probability, l_occupied;
 
 private:
-    float angle, distance, max_distance, x, y;
-    int x_index, y_index;
-
-    Result<IChannel*> channel = Result<IChannel*>(nullptr);
-    ILidarDriver* driver;
-    sl_result res;
-    sl_lidar_response_measurement_node_hq_t measurements[N_LIDAR_SAMPLES];
-    size_t measurements_array_size = N_LIDAR_SAMPLES;
 };
 
 #endif

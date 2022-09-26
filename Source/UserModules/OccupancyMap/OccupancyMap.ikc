@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<class name="OccupancyMap" description="Grid containing measurements of obstacle positions and free space">
+
+	<description type="text">
+		Module implementing a Bayesian filter occupancy map.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="OccupancyMap"
+			name="OccupancyMap"
+		/>
+	</example>
+
+	<parameter name="prior" type="float" deafult="0.5" description="Prior expectation of walls" />
+	<parameter name="empty_probability" type="float" default="0.35" description="Evidence accumulated by an observation of empty space" />
+	<parameter name="occupied_probability" type="float" default="256000" description="Evidence accumulated by an observation of occupied space" />
+
+	<input name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor" size="8192" />
+	<input name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor" size="8192" />
+	<output name="OCCUPANCY_GRID" description="Matrix of positions of objects detected by the lidar sensor" size_x="128" size_y="128" />
+
+	<link class="OccupancyMap" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>OccupancyMap.h</file>
+   		<file>OccupancyMap.cc</file>
+   		<file>OccupancyMap.ikc</file>
+   </files>
+
+</class>

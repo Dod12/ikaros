@@ -35,9 +35,8 @@ LidarSensor::Init()
     Bind(baud_rate, "baud_rate");
 
     // Set output parameters
-    io(x_array, x_array_size, "X_POSITION");
-    io(y_array, y_array_size, "Y_POSITION");
-    io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "GRID");
+    io(r_array, r_array_size, "R_ARRAY");
+    io(theta_array, theta_array_size, "THETA_ARRAY");
 
     ///  Create a communication channel instance
     channel = createSerialPortChannel(serial_port, baud_rate);
@@ -70,34 +69,12 @@ LidarSensor::Tick()
     if (SL_IS_OK(res)) {
         res = driver->ascendScanData(measurements, measurements_array_size);
         if (SL_IS_OK(res)) {
-            max_distance = 0;
-            for (int i = 0; i < x_array_size; ++i) {
-                angle = (float) measurements[i].angle_z_q14 * 90.f / (1 << 14);
-                distance = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
 
-                x_array[i] = cos(angle * 2 * M_PI / 360) * distance;
-                y_array[i] = sin(angle * 2 * M_PI / 360) * distance;
-                if (abs(x_array[i]) > max_distance) {
-                    max_distance = abs(x_array[i]);
-                }
-                if (abs(y_array[i]) > max_distance) {
-                    max_distance = abs(y_array[i]);
-                }
-            }
-            for (int i = 0; i < grid_matrix_size_x; ++i) {
-                for (int j = 0; j < grid_matrix_size_y; ++j) {
-                    grid_matrix[i][j] = 0;
-                }
-            }
-            for (int i = 0; i < x_array_size; ++i) {
-                if (-max_distance <= x_array[i] && x_array[i] <= max_distance && -max_distance <= y_array[i] && y_array[i] <= max_distance) {
-                    x_index = std::clamp((int) ((grid_matrix_size_x / 2) * (x_array[i] / max_distance) + (grid_matrix_size_x / 2)), 0, grid_matrix_size_x -  1);
-                    y_index = std::clamp((int) ((grid_matrix_size_y / 2) * (y_array[i] / max_distance) + (grid_matrix_size_y / 2)), 0, grid_matrix_size_x -  1);
-                    grid_matrix[x_index][y_index] = 1;
-                } else {
-                    fprintf(stderr, "Illegal value in distance arrays: (%f, %f)\n", x_array[i], y_array[i]);
-                }
-
+            if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
+            
+            for (int i = 0; i < r_array_size; ++i) {
+                r_array[i] = (float) measurements[i].angle_z_q14 * 90.f / (1 << 14);
+                theta_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
             }
         } else {
             fprintf(stderr, "Failed to sort scan data\r\n");

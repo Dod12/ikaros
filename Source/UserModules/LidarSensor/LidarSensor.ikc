@@ -18,9 +18,8 @@
 	<parameter name="serial_port" type="string" description="Serial port to use for communication with LIDAR sensor" />
 	<parameter name="baud_rate" type="int" default="256000" description="Baud rate" />
 
-	<output name="X_POSITION" description="Array of x-positions of objects detected by the lidar sensor" size="8192" />
-	<output name="Y_POSITION" description="Array of y-positions of objects detected by the lidar sensor" size="8192" />
-	<output name="GRID" description="Matrix of positions of objects detected by the lidar sensor" size_x="256" size_y="256	"/>
+	<output name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor" size="8192" />
+	<output name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor" size="8192" />
 
 	<link class="LidarSensor" />
 

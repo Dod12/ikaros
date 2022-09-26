@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<class name="TransitionMatrix" description="Create transition matrix from grid.">
+
+	<description type="text">
+		Module for interacting with the RPLIDAR-A3 sensor.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="TransitionMatrix"
+			name="TransitionMatrix"
+		/>
+	</example>
+
+	<input name="OBSTACLE_GRID" description="Matrix of positions of objects detected by the lidar sensor" size_x="128" size_y="128" />
+	<output name="TRANSITION_MATRIX" description="Transition matrix for the obstacle grid" size_x="16384" size_y="16384" />
+
+	<link class="TransitionMatrix" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>TransitionMatrix.h</file>
+   		<file>TransitionMatrix.cc</file>
+   		<file>TransitionMatrix.ikc</file>
+   </files>
+
+</class>

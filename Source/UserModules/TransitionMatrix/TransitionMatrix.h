@@ -26,45 +26,47 @@
 
 #include "IKAROS.h"
 
-#include <rplidar.h>
-
-#define N_LIDAR_SAMPLES 8192
-
-using namespace sl;
-
-class LidarSensor: public Module
+class TransitionMatrix: public Module
 {
 public:
-    static Module * Create(Parameter * p) { return new LidarSensor(p); }
+    static Module * Create(Parameter * p) { return new TransitionMatrix(p); }
 
-    LidarSensor(Parameter * p) : Module(p) {}
-    ~LidarSensor();
+    TransitionMatrix(Parameter * p) : Module(p) {}
+    ~TransitionMatrix();
 
     void 		Init();
     void 		Tick();
 
+    // Input arrays
+
+    float ** grid_matrix;
+    int grid_matrix_size_x;
+    int grid_matrix_size_y;
+
     // Output arrays
 
-    float * r_array;
-    int r_array_size;
-
-    float * theta_array;
-    int theta_array_size;
-
-    // Parameters
-
-    int baud_rate;
-    std::string serial_port = {};
+    float ** transition_matrix;
+    int transition_matrix_size_x;
+    int transition_matrix_size_y;
 
 private:
-    float angle, distance, max_distance, x, y;
-    int x_index, y_index;
 
-    Result<IChannel*> channel = Result<IChannel*>(nullptr);
-    ILidarDriver* driver;
-    sl_result res;
-    sl_lidar_response_measurement_node_hq_t measurements[N_LIDAR_SAMPLES];
-    size_t measurements_array_size = N_LIDAR_SAMPLES;
+    enum Direction {
+        NORTH_EAST = 1,
+        NORTH = 2,
+        NORTH_WEST = 3,
+        EAST = 4,
+        WEST = 5,
+        SOUTH_EAST = 6,
+        SOUTH = 7,
+        SOUTH_WEST = 8,
+        NONE = -1
+    };
+
+    float get_grid_neighbour(int row, int col, Direction direction);
+    int get_node_number(int row, int col, Direction direction = NONE);
+    bool is_valid_node(int row, int col, Direction direction = NONE);
+
 };
 
 #endif
