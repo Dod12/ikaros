@@ -47,6 +47,10 @@ public:
 
     // Output arrays
 
+    float ** occupancy_matrix;
+    int occupancy_matrix_size_x;
+    int occupancy_matrix_size_y;
+
     float ** grid_matrix;
     int grid_matrix_size_x;
     int grid_matrix_size_y;
