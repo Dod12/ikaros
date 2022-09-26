@@ -13,6 +13,7 @@
 		/>
 	</example>
 
+	<parameter name="max_distance" type="float" description="Maximum distance to consider for the occupancy map in meters" default="10.0" />
 	<parameter name="prior" type="float" deafult="0.5" description="Prior expectation of walls" />
 	<parameter name="empty_probability" type="float" default="0.35" description="Evidence accumulated by an observation of empty space" />
 	<parameter name="occupied_probability" type="float" default="256000" description="Evidence accumulated by an observation of occupied space" />
