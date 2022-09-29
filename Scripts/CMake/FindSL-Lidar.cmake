@@ -20,6 +20,7 @@ find_path(SL_LIDAR_INCLUDE_DIR
         NAMES
         rplidar.h
         PATHS
+        ~/Documents/GitHub/rplidar_sdk/sdk/include
         /usr/local/include
         /usr/include
         PATH_SUFFIXES
@@ -31,6 +32,7 @@ find_library(SL_LIDAR_LIBRARIES
         NAMES
         libsl_lidar_sdk.a
         PATHS
+        ~/Documents/GitHub/rplidar_sdk/output/Darwin/Release
         /usr/local/lib
         /usr/lib
 )
