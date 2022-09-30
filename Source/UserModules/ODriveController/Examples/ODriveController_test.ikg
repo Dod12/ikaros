@@ -6,7 +6,8 @@
 			class = "ODriveController"
 			name = "Platform"
 			input_mode  = "3"
-			control_mode  = "0"
+			control_mode  = "3"
+			input_filter_bandwidth = "2"
 		/>
 
 		<view name="ODrive" >

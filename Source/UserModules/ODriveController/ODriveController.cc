@@ -105,8 +105,10 @@ void ODriveController::Command(std::string s, float x, float y, std::string valu
     else if (s == "back") back();
 }
 
+// The two motors are placed in a mirrored fashion in the robot platform, so that the left side is inverted.
+
 void ODriveController::left() {
-    target_array[0] += -1;
+    target_array[0] += 1;
     target_array[1] += 1;
     float target_left = target_array[0];
     float target_right = target_array[1];
@@ -115,7 +117,7 @@ void ODriveController::left() {
 }
 
 void ODriveController::right() {
-    target_array[0] += 1;
+    target_array[0] += -1;
     target_array[1] += -1;
     float target_left = target_array[0];
     float target_right = target_array[1];
@@ -124,7 +126,7 @@ void ODriveController::right() {
 }
 
 void ODriveController::back() {
-    target_array[0] += -1;
+    target_array[0] += 1;
     target_array[1] += -1;
     float target_left = target_array[0];
     float target_right = target_array[1];
@@ -133,7 +135,7 @@ void ODriveController::back() {
 }   
 
 void ODriveController::forward() {
-    target_array[0] += 1;
+    target_array[0] += -1;
     target_array[1] += 1;
     float target_left = target_array[0];
     float target_right = target_array[1];
