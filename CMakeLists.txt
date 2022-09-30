@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 3.0.2)
 # To use elseif
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 
+SET(CMAKE_OSX_DEPLOYMENT_TARGET 12.0)
+
 # Project name
 project(ikaros)
 
@@ -25,7 +27,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
   # An advanced variable will not be displayed in any of the cmake GUIs
   mark_as_advanced(ACCELERATE_LIBRARY COCOA_LIBRARY QUARTZ_LIBRARY)
-    set(EXTRA_LIBS ${ACCELERATE_LIBRARY} ${COCOA_LIBRARY} ${QUARTZ_LIBRARY} )
+    set(EXTRA_LIBS ${ACCELERATE_LIBRARY} ${COCOA_LIBRARY} ${QUARTZ_LIBRARY})
 
   # CoreMIDI
   add_definitions(-D__MACOSX_CORE__)
@@ -33,7 +35,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(COREFOUNDATION CoreFoundation)
   find_library(COREMIDI CoreMidi)
   find_library(CORESERVICES CoreServices)
-  set(EXTRA_LIBS ${EXTRA_LIBS} ${COREAUDIO} ${COREFOUNDATION} ${COREMIDI} ${CORESERVICES})
+  find_library(SECURITY Security)             # Contains interfaces for USB used for ODriveController
+  find_library(IOKIT IOKit)                   # Contains interfaces for USB used for ODriveController
+  set(EXTRA_LIBS ${EXTRA_LIBS} ${COREAUDIO} ${COREFOUNDATION} ${COREMIDI} ${CORESERVICES} ${SECURITY} ${IOKIT})
   
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 

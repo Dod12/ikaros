@@ -21,6 +21,7 @@
 //
 
 #include "OccupancyMap.h"
+#include <iostream>
 
 using namespace ikaros;
 
@@ -31,7 +32,7 @@ float prob_to_log_odds(float prob)
 
 std::vector<std::pair<int, int>> interpolate_bresenham(float x, float y) {
     std::vector<std::pair<int, int>> points;
-    int x0 = 0, y0 = 0;
+    int x0 = 128, y0 = 128; // Centre of gridmap is at half the size.
     float dx = abs(x - x0);
     float dy = -abs(y - y0);
     int sx = x0 < x ? 1 : -1;
@@ -74,10 +75,12 @@ OccupancyMap::Init()
     io(theta_array, theta_array_size, "THETA_ARRAY");
 
     // Set output matrix
-    io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "GRID");
+    io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "GRID_MATRIX");
     set_matrix(grid_matrix, 0, grid_matrix_size_x, grid_matrix_size_y);
-    io(occupancy_matrix, occupancy_matrix_size_x, occupancy_matrix_size_y, "OCCUPANCY_GRID");
-    set_matrix(occupancy_matrix, l_prior, occupancy_matrix_size_x, occupancy_matrix_size_y);
+    io(occupancy_matrix, occupancy_matrix_size_x, occupancy_matrix_size_y, "OCCUPANCY_MATRIX");
+    set_matrix(occupancy_matrix, 0, occupancy_matrix_size_x, occupancy_matrix_size_y);
+
+    empty_cells.reserve(occupancy_matrix_size_x*occupancy_matrix_size_y/2);
 }
 
 void
@@ -85,18 +88,26 @@ OccupancyMap::Tick()
 {   
     if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "Input arrays must be of equal size"); }
     
-    std::vector<std::pair<int, int>> empty_cells;
-    empty_cells.reserve(occupancy_matrix_size_x*occupancy_matrix_size_y);
+    set_matrix(grid_matrix, 0, grid_matrix_size_x, grid_matrix_size_y);
 
-    set_matrix(occupancy_matrix, 0, occupancy_matrix_size_x, occupancy_matrix_size_y);
+    empty_cells.clear();
 
     for (int i = 0; i < r_array_size; ++i) {
-        float x = r_array[i] * cos(theta_array[i]), y = r_array[i] * sin(theta_array[i]);
+        float x = r_array[i] * cos(theta_array[i]);
+        float y = r_array[i] * sin(theta_array[i]);
 
-        int x_index = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x);
-        int y_index = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y);
-        occupancy_matrix[x_index][y_index] += l_occupied - l_prior;
-        grid_matrix[x_index][y_index] = 1; // Setting the grid to 1 means that there is an obstacle in the cellv
+        if (x >= max_distance) {
+            std::cout << "X larger than max: " << x << std::endl;
+        } else if (y >= max_distance) {
+            std::cout << "Y larger than max: " << y << std::endl;
+        }
+
+        //std::cout << "r: " << r_array[i] << ", theta: " << theta_array[i] << std::endl;
+
+        int x_index = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
+        int y_index = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
+        occupancy_matrix[x_index][y_index] += l_occupied - occupancy_matrix[x_index][y_index];
+        grid_matrix[x_index][y_index] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
 
         auto bresenham_cells = interpolate_bresenham(x_index, y_index);
 
@@ -104,7 +115,7 @@ OccupancyMap::Tick()
     }
 
     for (auto&& [x, y] : empty_cells) {
-        occupancy_matrix[x][y] += l_empty - l_prior;
+        occupancy_matrix[x][y] += l_empty - occupancy_matrix[x][y];
     }
 }
 

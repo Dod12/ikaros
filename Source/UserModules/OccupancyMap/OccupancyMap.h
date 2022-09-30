@@ -21,8 +21,8 @@
 //
 
 
-#ifndef LidarSensor_
-#define LidarSensor_
+#ifndef OccupancyMap_
+#define OccupancyMap_
 
 #include "IKAROS.h"
 
@@ -59,6 +59,8 @@ public:
 
     float max_distance;
     float prior, l_prior, empty_probability, l_empty, occupied_probability, l_occupied;
+
+    std::vector<std::pair<int, int>> empty_cells;
 
 private:
 };

@@ -25,6 +25,8 @@
 
 #include "IKAROS.h"
 
+#include "odrive/odrive.h"
+
 class ODriveController: public Module
 {
 public:
@@ -35,33 +37,28 @@ public:
 
     void 		Init();
     void 		Tick();
+                
+    void        Command(std::string s, float x, float y, std::string value);
+    void        left();
+    void        right();
+    void        back();
+    void        forward();
 
     // pointers to inputs and outputs
     // and integers to represent their sizes
 
-    float *     input_array;
-    int         input_array_size;
+    float* target_array;
+    int target_array_size;
 
-    float **    input_matrix;
-    int         input_matrix_size_x;
-    int         input_matrix_size_y;
+    float* odom_array;
+    int odom_array_size;
 
-    float *     output_array;
-    int         output_array_size;
+    int control_mode;
+    int input_mode;
 
-    float **    output_matrix;
-    int         output_matrix_size_x;
-    int         output_matrix_size_y;
+    float input_filter_bandwidth, vel_ramp_rate;
 
-    // internal data storage
-
-    float *     internal_array;
-    float **    internal_matrix;
-
-    // parameter values
-
-    float       float_parameter;
-    int         int_parameter;
+    odrive::ODrive odrive;
 };
 
 #endif

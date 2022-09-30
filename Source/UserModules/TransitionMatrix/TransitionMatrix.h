@@ -21,8 +21,8 @@
 //
 
 
-#ifndef LidarSensor_
-#define LidarSensor_
+#ifndef TransitionMatrix_
+#define TransitionMatrix_
 
 #include "IKAROS.h"
 

@@ -1,7 +1,7 @@
 //
-//	MyModule.cc		This file is a part of the IKAROS project
+//	ODriveController.cc		This file is a part of the IKAROS project
 //
-//    Copyright (C) 2012 <Author Name>
+//    Copyright (C) 2022 Daniel Calström Schad
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,18 +19,16 @@
 //
 //    See http://www.ikaros-project.org/ for more information.
 //
-//  This example is intended as a starting point for writing new Ikaros modules
-//  The example includes most of the calls that you may want to use in a module.
-//  If you prefer to start with a clean example, use he module MinimalModule instead.
-//
 
 #include "ODriveController.h"
+#include <iostream>
 
 // use the ikaros namespace to access the math library
 // this is preferred to using <cmath>
 
 using namespace ikaros;
-
+using namespace odrive::endpoints;
+using namespace odrive::enums;
 
 void
 ODriveController::Init()
@@ -40,108 +38,109 @@ ODriveController::Init()
     // from the IKC and can optionally be changed from the
     // user interface while Ikaros is running. If the parameter is not
     // set, the default value specified in the ikc-file will be used instead.
-    
-    Bind(float_parameter, "parameter1");
-    Bind(int_parameter, "parameter2");
-    
-    // This is were we get pointers to the inputs and outputs
 
-    // Get a pointer to the input INPUT1 and its size which we set
-    // to 10 above
-    // It does not matter whether a matrix of array is connected
-    // to the inputs. We will treat it an array in this module
-    // anyway.
+    Bind(input_mode, "input_mode");
+    Bind(control_mode, "control_mode");
+    Bind(input_filter_bandwidth, "input_filter_bandwidth");
+    Bind(vel_ramp_rate, "vel_ramp_rate");
 
-    io(input_array, input_array_size, "INPUT1");
+    control_mode = (ControlMode) control_mode;
+    input_mode = (InputMode) input_mode;
 
-    // Get pointer to a matrix and treat it as a matrix. If an array is
-    // connected to this input, size_y will be 1.
+    //io(target_array, target_array_size, "TARGET_ARRAY");
+    target_array = create_array(2);
+    target_array_size = 2;
+    set_array(target_array, 0, target_array_size);
 
-    io(input_matrix, input_matrix_size_x, input_matrix_size_y, "INPUT2");
+    io(odom_array, odom_array_size, "ODOM_ARRAY");
 
-    // Do the same for the outputs
+    odrive = odrive::ODrive();
+    odrive.search_device();
 
-    io(output_array, output_array_size, "OUTPUT1");
-    io(output_matrix, output_matrix_size_x, output_matrix_size_y, "OUTPUT2");
+    odrive.write(AXIS__CONTROLLER__CONFIG__CONTROL_MODE, control_mode);
+    odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_MODE, input_mode);
 
-    // Allocate some data structures to use internaly
-    // in the module
-
-    // Create an array with ten elements
-    // To access the array use internal_array[i].
-
-    internal_array = create_array(10);
-
-    // Create a matrix with the same size as INPUT2
-    // IMPORTANT: For the matrix the sizes are given in order X, Y
-    // in all functions including when the matrix is created
-    // See: http://www.ikaros-project.org/articles/2007/datastructures/
-
-    internal_matrix = create_matrix(input_matrix_size_x, input_matrix_size_y);
-
-    // To acces the matrix use internal_matrix[y][x].
-    //
-    // IMPORTANT: y is the first index and x the second,
-    //
-    // It is also possible to use the new operator to
-    // create arrays, but create_array and create_matix
-    // should be used to make sure that memory is
-    // allocated in a way that is suitable for the math
-    // library and fast copying operations.
+    if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL && 
+        input_mode == InputMode::INPUT_MODE_POS_FILTER) {
+        odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_FILTER_BANDWIDTH, input_filter_bandwidth);
+        odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_FILTER_BANDWIDTH + per_axis_offset, input_filter_bandwidth);
+    } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL &&
+               input_mode == InputMode::INPUT_MODE_VEL_RAMP) {
+        odrive.write(AXIS__CONTROLLER__CONFIG__VEL_RAMP_RATE, vel_ramp_rate);
+        odrive.write(AXIS__CONTROLLER__CONFIG__VEL_RAMP_RATE + per_axis_offset, vel_ramp_rate);
+    }
 }
-
-
-
-ODriveController::~ODriveController()
-{
-    // In general, a dstructor is only necessary 
-    // when a module communicates with external devices etc
-    // All modules are destroyed when Ikaros stops
-
-    // Destroy data structures that you allocated in Init.
-
-    destroy_array(internal_array);
-    destroy_matrix(internal_matrix);
-
-    // Do NOT destroy data structures that you got from the
-    // kernel with io or GetInputArray, GetInputMatrix etc.
-}
-
-
 
 void
 ODriveController::Tick()
-{
-    // This is where you implement your algorithm
-    // to calculate the outputs from the inputs
+{           
+    float target_left = target_array[0];
+    float target_right = target_array[1];
+    if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
+        odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
+        odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+    } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) {
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL, target_left);
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL + per_axis_offset, target_right);
+    } else if (control_mode == ControlMode::CONTROL_MODE_TORQUE_CONTROL) {
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE, target_left);
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_right);
+    }
 
-    // This example makes a copy of the data on INPUT2 which is now
-    // in input_matrix to internal_matrix
-    // Arrays can be similarly copied with copy_array()
-    // To clear an array or matrix use reset_array and reset_matrix
-
-    copy_matrix(internal_matrix, input_matrix, input_matrix_size_x, input_matrix_size_y);
-
-    // Calculate the output by iterating over the elements of the
-    // output matrix. Note the order of the indices into the matrix.
-    //
-    // In most cases it is much faster to put the for-loops with
-    // the row index (j) in the outer loop, because it will lead
-    // to more efficient cache use.
-
-    for (int j=0; j<output_matrix_size_y; j++)
-        for (int i=0; i<output_matrix_size_x; i++)
-            output_matrix[j][i] = 0.5;
-
-    // Fill the output array with random values
-
-    random(output_array, 0.0, 1.0, output_array_size);
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE, odom_array[0]);
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, odom_array[1]);
 }
 
+ODriveController::~ODriveController()
+{
+    // ODrive driver handles relasing the USB context
+    destroy_array(target_array);
+}
 
+void ODriveController::Command(std::string s, float x, float y, std::string value) {
+    std::cout << "Got command: " << s << std::endl;
+    if (s == "left") left();
+    else if (s == "right") right();
+    else if (s == "forward") forward();
+    else if (s == "back") back();
+}
+
+void ODriveController::left() {
+    target_array[0] += -1;
+    target_array[1] += 1;
+    float target_left = target_array[0];
+    float target_right = target_array[1];
+    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
+    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+}
+
+void ODriveController::right() {
+    target_array[0] += 1;
+    target_array[1] += -1;
+    float target_left = target_array[0];
+    float target_right = target_array[1];
+    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
+    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+}
+
+void ODriveController::back() {
+    target_array[0] += -1;
+    target_array[1] += -1;
+    float target_left = target_array[0];
+    float target_right = target_array[1];
+    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
+    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+}   
+
+void ODriveController::forward() {
+    target_array[0] += 1;
+    target_array[1] += 1;
+    float target_left = target_array[0];
+    float target_right = target_array[1];
+    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
+    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+}
 
 // Install the module. This code is executed during start-up.
 
 static InitClass init("ODriveController", &ODriveController::Create, "Source/UserModules/ODriveController/");
-
-

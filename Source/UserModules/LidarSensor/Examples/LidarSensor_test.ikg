@@ -9,8 +9,19 @@
 		baud_rate = "256000"
 	/>
 
+	<module
+		class = "OccupancyMap"
+		name = "OccupancyMap"
+		max_distance = "10" 
+		prior="0.5"
+	/>
+
+	<connection source="LidarSensor.R_ARRAY" target="OccupancyMap.R_ARRAY" />
+	<connection source="LidarSensor.THETA_ARRAY" target="OccupancyMap.THETA_ARRAY" />
+  
 	<view  name = "LidarSensor">
-		<grid width="800" height="800" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Gridmap" direction = "horizontal" source = "LidarSensor.GRID" x = "10" y = "10" valueLow="0" valueHigh="1"/>
+		<grid width="800" height="800" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Expected gridmap state" direction = "horizontal" source = "OccupancyMap.OCCUPANCY_MATRIX" x = "820" y = "10" valueLow="0" valueHigh="1"/>
+		<grid width="800" height="800" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Measured gridmap state" direction = "horizontal" source = "OccupancyMap.GRID_MATRIX" x = "10" y = "10" valueLow="0" valueHigh="1"/>
 	</view>
 
     <module class = "Logger" name = "Logger" />

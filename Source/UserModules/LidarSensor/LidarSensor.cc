@@ -1,7 +1,7 @@
 //
 //	MinimalModule.cc		This file is a part of the IKAROS project
 //
-//    Copyright (C) 2012 <Author Name>
+//    Copyright (C) 2022 Daniel Carlström Schad
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -73,8 +73,8 @@ LidarSensor::Tick()
             if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
             
             for (int i = 0; i < r_array_size; ++i) {
-                r_array[i] = (float) measurements[i].angle_z_q14 * 90.f / (1 << 14);
-                theta_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
+                theta_array[i] = ((float) measurements[i].angle_z_q14 * 90.f / (1 << 14)) * 2 * M_PI / 360;
+                r_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
             }
         } else {
             fprintf(stderr, "Failed to sort scan data\r\n");
