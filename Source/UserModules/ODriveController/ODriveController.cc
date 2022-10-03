@@ -111,8 +111,8 @@ ODriveController::Tick()
     float odom_left, odom_right;
     odrive.read(AXIS__ENCODER__POS_ESTIMATE, odom_left);
     odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, odom_right);
-    pos_array[0] = circumference * (-1 * odom_left - offset_array[0]); 
-    pos_array[1] = circumference * (odom_right - offset_array[1]);
+    pos_array[0] = -1 * odom_left - offset_array[0]; 
+    pos_array[1] = odom_right - offset_array[1];
 }
 
 ODriveController::~ODriveController()

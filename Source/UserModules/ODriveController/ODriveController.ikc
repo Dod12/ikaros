@@ -39,7 +39,6 @@
 	<parameter name="input_mode" type="int" default="0" description="Input filtering applied to the axis" />
 	<parameter name="input_filter_bandwidth" type="float" default="1" description="Filter width applied to input position signal" />
 	<parameter name="vel_ramp_rate" type="float" default="0.5" description="Maximum acceleration when using velocity input" />
-	<parameter name="wheel_circumference" type="float" default="0.098182" description="Meters travelled in one rotation" />
 
 	<input name="TARGET_ARRAY" description="Left and right axis targets" size="2" />
 	<output name="POS_ESTIM" description="Left and right measured encoder positions" size="2" />

@@ -38,6 +38,7 @@ PathIntegrator::Init()
     // set, the default value specified in the ikc-file will be used instead.
 
     Bind(wheelbase, "wheelbase");
+    Bind(circumference, "wheel_circumference");
 
     io(pos_array, pos_array_size, "POS_ARRAY");
 
@@ -50,34 +51,44 @@ PathIntegrator::Init()
     set_array(prev_pos_array, 0, pos_array_size);
     vel_array = create_array(pos_array_size);
     set_array(vel_array, 0, pos_array_size);
+    position_turns = create_array(pos_array_size);
+    set_array(position_turns, 0, pos_array_size);
 
     rotation_centre = create_array(position_size);
 }
 
 void
 PathIntegrator::Tick()
-{   
-    std::cout << "NEW POS:  X: " << pos_array[0] << ", Y: " << pos_array[1] << std::endl;
-    std::cout << "OLD POS:  X: " << prev_pos_array[0] << ", Y: " << prev_pos_array[1] << std::endl;
+{
+    float left_delta = circumference * (pos_array[0] - prev_pos_array[0]); // Convert turns to meters
+    float right_delta = circumference * (pos_array[1] - prev_pos_array[1]);
 
-    vel_array[0] = pos_array[0] - prev_pos_array[0];
-    vel_array[1] = pos_array[1] - prev_pos_array[1];
-
-    std::cout << "VELOCITY: X: " << vel_array[0] << ", Y: " << vel_array[1] << std::endl;
+    if (ticks < 3) ++ticks;
     
-    if (abs(vel_array[0]) > 1e-5 || abs(vel_array[1]) > 1e-5){
-        r = (wheelbase / 2) * ((vel_array[0] - vel_array[1])/(vel_array[0] + vel_array[1]));
-        omega = (vel_array[1] - vel_array[0]) / 2;
+    if ((abs(left_delta) > 1e-3 || abs(right_delta) > 1e-3) && ticks > 2 ){ // Only update position if significant movement AND some ticks have passed
+        if (abs(right_delta - left_delta) < 1e-3) { // Forwards or backwards straight motion
+            position[0] += left_delta * cos(heading[0]);
+            position[1] += right_delta * sin(heading[0]);
+        } else { // Calculate arclength 
+            r = wheelbase * (right_delta + left_delta) / (2 * (right_delta-left_delta));
+            omega = (right_delta - left_delta) / wheelbase;
 
-        rotation_centre[0] = prev_pos_array[0] - r * sin(heading[0]);
-        rotation_centre[1] = prev_pos_array[1] + r * cos(heading[0]);
+            position[0] += r * sin(omega + heading[0]) - r * sin(heading[0]);
+            position[1] += r * cos(omega + heading[0]) - r * cos(heading[0]);
+            heading[0] += omega; // TODO: FIX ME
+            /*
+            
 
-        position[0] = rotation_centre[0] + (prev_pos_array[0] - rotation_centre[0]) * cos(omega) - (prev_pos_array[1] - rotation_centre[1]) * sin(omega);
-        position[1] = rotation_centre[0] + (prev_pos_array[0] - rotation_centre[0]) * sin(omega) + (prev_pos_array[1] - rotation_centre[1]) * cos(omega);
-        heading[0] = heading[0] + omega;
+            rotation_centre[0] = position_turns[0] - r * sin(heading[0]);
+            rotation_centre[1] = position_turns[1] + r * cos(heading[0]);
 
+            float x_position = rotation_centre[0] + (position_turns[0] - rotation_centre[0]) * cos(omega) - (position_turns[1] - rotation_centre[1]) * sin(omega);
+            float y_position = rotation_centre[1] + (position_turns[0] - rotation_centre[0]) * sin(omega) + (position_turns[1] - rotation_centre[1]) * cos(omega);
+            position_turns[0] = x_position; position_turns[1] = y_position;
+            heading[0] = heading[0] + omega;
+            */
+        }
         std::cout << "OUTPUT: X: " << position[0] << ", Y: " << position[1] << ", Heading: " << heading[0] << std::endl;
-
         prev_pos_array[0] = pos_array[0];
         prev_pos_array[1] = pos_array[1];
     } else {

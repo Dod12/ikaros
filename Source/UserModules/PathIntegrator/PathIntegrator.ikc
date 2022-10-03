@@ -15,6 +15,7 @@
 	</example>
 
 	<parameter name="wheelbase" description="Length of the wheelbase in meters" default="35.55" />
+	<parameter name="wheel_circumference" type="float" default="0.098182" description="Meters travelled in one rotation" />
 
 	<input name="POS_ARRAY" description="Left and right axis estimator positions" size="2" />
 

@@ -39,7 +39,8 @@ public:
     // pointers to inputs and outputs
     // and integers to represent their sizes
 
-    float wheelbase, r, omega;
+    float wheelbase, circumference, r, omega;
+    int ticks = 0;
 
     float* pos_array;
     int pos_array_size;
@@ -52,6 +53,8 @@ public:
 
     float* position;
     int position_size;
+
+    float* position_turns;
 
     float* heading;
     int heading_size;

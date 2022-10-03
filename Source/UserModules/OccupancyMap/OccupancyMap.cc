@@ -98,13 +98,13 @@ OccupancyMap::Tick()
         float x_egocentric = r_array[i] * cos(theta_array[i]);
         float y_egocentric = r_array[i] * sin(theta_array[i]);
 
-        float x = x*cos(heading[0]) - y_egocentric*sin(heading[0]) + position[0];
-        float y = x*sin(heading[0]) + y_egocentric*cos(heading[0]) + position[1];
+        float x = x_egocentric*cos(heading[0]) - y_egocentric*sin(heading[0]) + position[0];
+        float y = x_egocentric*sin(heading[0]) + y_egocentric*cos(heading[0]) + position[1];
 
         if (x >= max_distance) {
-            std::cout << "X larger than max: " << x << std::endl;
+            //std::cout << "X larger than max: " << x << std::endl;
         } else if (y >= max_distance) {
-            std::cout << "Y larger than max: " << y << std::endl;
+            //std::cout << "Y larger than max: " << y << std::endl;
         }
 
         //std::cout << "r: " << r_array[i] << ", theta: " << theta_array[i] << std::endl;
