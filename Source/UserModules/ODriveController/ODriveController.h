@@ -20,8 +20,8 @@
 //    See http://www.ikaros-project.org/ for more information.
 //
 
-#ifndef MyModule_
-#define MyModule_
+#ifndef ODriveController_
+#define ODriveController_
 
 #include "IKAROS.h"
 
@@ -37,12 +37,6 @@ public:
 
     void 		Init();
     void 		Tick();
-                
-    void        Command(std::string s, float x, float y, std::string value);
-    void        left();
-    void        right();
-    void        back();
-    void        forward();
 
     // pointers to inputs and outputs
     // and integers to represent their sizes
@@ -50,13 +44,19 @@ public:
     float* target_array;
     int target_array_size;
 
-    float* odom_array;
-    int odom_array_size;
+    float* pos_array;
+    int pos_array_size;
+
+    float* vel_array;
+    int vel_array_size;
+
+    float* offset_array;
+    int offset_array_size;
 
     int control_mode;
     int input_mode;
 
-    float input_filter_bandwidth, vel_ramp_rate;
+    float input_filter_bandwidth, vel_ramp_rate, circumference;
 
     odrive::ODrive odrive;
 };

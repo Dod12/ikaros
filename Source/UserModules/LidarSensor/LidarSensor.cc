@@ -65,11 +65,10 @@ LidarSensor::Init()
 void
 LidarSensor::Tick()
 {
-    res = driver->grabScanDataHq(measurements, measurements_array_size,0);
+    res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
     if (SL_IS_OK(res)) {
         res = driver->ascendScanData(measurements, measurements_array_size);
         if (SL_IS_OK(res)) {
-
             if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
             
             for (int i = 0; i < r_array_size; ++i) {
@@ -77,10 +76,10 @@ LidarSensor::Tick()
                 r_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
             }
         } else {
-            fprintf(stderr, "Failed to sort scan data\r\n");
+            fprintf(stderr, "Failed to sort scan data: %i\r\n", res);
         }
     } else {
-        fprintf(stderr, "Error while retrieving scan data\r\n");
+        fprintf(stderr, "Error while retrieving scan data: %i\r\n", res);
     }
 }
 

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<class name="PathIntegrator" description="Path integrator">
+
+	<description type="text">
+		Takes encoder positions esch tick, and estimates current position.
+		Pusblishes transformation matrix for heading and position.
+	</description>
+	
+	<example description="A simple example">	
+		<module
+			class="PathIntegrator"
+			name="PathIntegrator"
+		/>
+	</example>
+
+	<parameter name="wheelbase" description="Length of the wheelbase in meters" default="35.55" />
+
+	<input name="POS_ARRAY" description="Left and right axis estimator positions" size="2" />
+
+	<output name="POSITION" description="x, y coordinates for the robot" size="2" />
+	<output name="HEADING" description="Angle the robot is facing in radians" size="1" />
+
+	<link class="PathIntegrator" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>TargetArrayControls.h</file>
+   		<file>TargetArrayControls.cc</file>
+   		<file>TargetArrayControls.ikc</file>
+   </files>
+
+</class>

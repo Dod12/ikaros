@@ -43,43 +43,64 @@ ODriveController::Init()
     Bind(control_mode, "control_mode");
     Bind(input_filter_bandwidth, "input_filter_bandwidth");
     Bind(vel_ramp_rate, "vel_ramp_rate");
+    Bind(circumference, "wheel_circumference");
 
     control_mode = (ControlMode) control_mode;
     input_mode = (InputMode) input_mode;
 
-    //io(target_array, target_array_size, "TARGET_ARRAY");
-    target_array = create_array(2);
-    target_array_size = 2;
+    io(target_array, target_array_size, "TARGET_ARRAY");
     set_array(target_array, 0, target_array_size);
 
-    io(odom_array, odom_array_size, "ODOM_ARRAY");
+    io(pos_array, pos_array_size, "POS_ESTIM");
+    io(vel_array, vel_array_size, "VEL_ESTIM");
 
+    offset_array_size = 2;
+    offset_array = create_array(offset_array_size);
+
+    // Init driver
     odrive = odrive::ODrive();
-    odrive.search_device();
+    if (odrive.search_device() != odrive::ReturnStatus::STATUS_SUCCESS) throw "Could not find ODrive";
 
-    odrive.write(AXIS__CONTROLLER__CONFIG__CONTROL_MODE, control_mode);
-    odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_MODE, input_mode);
+    for (auto offset : std::vector<int>{0, per_axis_offset})
 
-    if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL && 
-        input_mode == InputMode::INPUT_MODE_POS_FILTER) {
-        odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_FILTER_BANDWIDTH, input_filter_bandwidth);
-        odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_FILTER_BANDWIDTH + per_axis_offset, input_filter_bandwidth);
-    } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL &&
-               input_mode == InputMode::INPUT_MODE_VEL_RAMP) {
-        odrive.write(AXIS__CONTROLLER__CONFIG__VEL_RAMP_RATE, vel_ramp_rate);
-        odrive.write(AXIS__CONTROLLER__CONFIG__VEL_RAMP_RATE + per_axis_offset, vel_ramp_rate);
+    {
+        // Set desired mode (position/veolcity) and input filtering
+        odrive.write(AXIS__CONTROLLER__CONFIG__CONTROL_MODE + offset, control_mode);
+
+        odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_MODE + offset, input_mode);
+
+        // Set params for filter if desired and compatible with control mode
+        if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL && input_mode == InputMode::INPUT_MODE_POS_FILTER) {
+            odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_FILTER_BANDWIDTH + offset, input_filter_bandwidth);
+
+        } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL && input_mode == InputMode::INPUT_MODE_VEL_RAMP) {
+            odrive.write(AXIS__CONTROLLER__CONFIG__VEL_RAMP_RATE + offset, vel_ramp_rate);
+
+        } else {
+            fprintf(stderr, "Control and input modes are not compatible, got control mode %i and input mode %i", control_mode, input_mode);
+        }
+    }
+
+    // Disable closed loop controls for reseting the encoder index
+    if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
+        for (int i = 0; i < offset_array_size; ++i) {
+            odrive.read(AXIS__ENCODER__POS_ESTIMATE + i*per_axis_offset, offset_array[i]);
+        }
+    } else {
+        set_array(offset_array, 0, offset_array_size);
     }
 }
 
 void
 ODriveController::Tick()
-{           
-    float target_left = target_array[0];
-    float target_right = target_array[1];
+{   
+    // We need to invert the left desired pos, since the axes are mirrored
+    float target_left = -1 * target_array[0] + offset_array[0];
+    float target_right = target_array[1] + offset_array[1];
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
         odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
-    } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) {
+    } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) { 
         odrive.write(AXIS__CONTROLLER__INPUT_VEL, target_left);
         odrive.write(AXIS__CONTROLLER__INPUT_VEL + per_axis_offset, target_right);
     } else if (control_mode == ControlMode::CONTROL_MODE_TORQUE_CONTROL) {
@@ -87,60 +108,17 @@ ODriveController::Tick()
         odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_right);
     }
 
-    odrive.read(AXIS__ENCODER__POS_ESTIMATE, odom_array[0]);
-    odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, odom_array[1]);
+    float odom_left, odom_right;
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE, odom_left);
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, odom_right);
+    pos_array[0] = circumference * (-1 * odom_left - offset_array[0]); 
+    pos_array[1] = circumference * (odom_right - offset_array[1]);
 }
 
 ODriveController::~ODriveController()
 {
     // ODrive driver handles relasing the USB context
-    destroy_array(target_array);
-}
-
-void ODriveController::Command(std::string s, float x, float y, std::string value) {
-    std::cout << "Got command: " << s << std::endl;
-    if (s == "left") left();
-    else if (s == "right") right();
-    else if (s == "forward") forward();
-    else if (s == "back") back();
-}
-
-// The two motors are placed in a mirrored fashion in the robot platform, so that the left side is inverted.
-
-void ODriveController::left() {
-    target_array[0] += 1;
-    target_array[1] += 1;
-    float target_left = target_array[0];
-    float target_right = target_array[1];
-    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
-    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
-}
-
-void ODriveController::right() {
-    target_array[0] += -1;
-    target_array[1] += -1;
-    float target_left = target_array[0];
-    float target_right = target_array[1];
-    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
-    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
-}
-
-void ODriveController::back() {
-    target_array[0] += 1;
-    target_array[1] += -1;
-    float target_left = target_array[0];
-    float target_right = target_array[1];
-    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
-    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
-}   
-
-void ODriveController::forward() {
-    target_array[0] += -1;
-    target_array[1] += 1;
-    float target_left = target_array[0];
-    float target_right = target_array[1];
-    odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
-    odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
+    destroy_array(offset_array);
 }
 
 // Install the module. This code is executed during start-up.

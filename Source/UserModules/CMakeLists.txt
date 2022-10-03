@@ -9,6 +9,8 @@ add_subdirectory(LidarSensor)
 add_subdirectory(OccupancyMap)
 add_subdirectory(TransitionMatrix)
 add_subdirectory(ODriveController)
+add_subdirectory(TargetArrayControls)
+add_subdirectory(PathIntegrator)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)

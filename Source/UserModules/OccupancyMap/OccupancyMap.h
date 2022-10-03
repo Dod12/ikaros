@@ -45,6 +45,12 @@ public:
     float * theta_array;
     int theta_array_size;
 
+    float * position;
+    int position_size;
+
+    float * heading;
+    int heading_size;
+
     // Output arrays
 
     float ** occupancy_matrix;

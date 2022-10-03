@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+
+<group name="TargetArrayController" title="ODriveController Example">
+
+	<module
+		class = "TargetArrayControls"
+		name = "Controls"
+	/>
+
+	<module 
+		class = "ODriveController"
+		name = "Controller"
+		input_mode  = "3"
+		control_mode  = "3"
+		input_filter_bandwidth = "2"
+	/>
+
+	<connection source="Controls.TARGET_ARRAY" target="Controller.TARGET_ARRAY" />
+
+	<view name="ODrive" >
+		<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />
+		<button height = "25" width = "100" y = "45" x = "230" label="Right" title="Right" command="Controls.right" />
+		<button height = "25" width = "100" y = "10" x = "120" label="Forward" title="Forward" command="Controls.forward" />
+		<button height = "25" width = "100" y = "80" x = "120" label="Backward" title="Back" command="Controls.backward" />
+		<button height = "25" width = "100" y = "10" x = "10" label="Forward Left" title="Forward Left" command="Controls.forward_left" />
+		<button height = "25" width = "100" y = "10" x = "230" label="Forward Right" title="Forward Right" command="Controls.forward_right" />
+		<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
+		<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
+
+		<grid width="600" height="600" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Expected gridmap state" direction = "horizontal" source = "OccupancyMap.OCCUPANCY_MATRIX" x = "800" y = "125" valueLow="0" valueHigh="1"/>
+		<grid width="600" height="600" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Measured gridmap state" direction = "horizontal" source = "OccupancyMap.GRID_MATRIX" x = "100" y = "125" valueLow="0" valueHigh="1"/>
+	</view>
+
+	<module
+		class = "PathIntegrator"
+		name = "Position"
+	/>
+
+	<module
+		class = "LidarSensor"
+		name = "LidarSensor"
+		serial_port = "/dev/tty.usbserial-0001"
+		baud_rate = "256000"
+	/>
+
+	<module
+		class = "OccupancyMap"
+		name = "OccupancyMap"
+		max_distance = "10" 
+		prior="0.5"
+	/>
+
+	<connection source="LidarSensor.R_ARRAY" target="OccupancyMap.R_ARRAY" />
+	<connection source="LidarSensor.THETA_ARRAY" target="OccupancyMap.THETA_ARRAY" />
+	<connection source="Position.POSITION" target="OccupancyMap.POSITION" />
+	<connection source="Position.HEADING" target="OccupancyMap.HEADING" />
+	<connection source="Controller.POS_ESTIM" target="Position.POS_ARRAY" />
+
+	<module class = "Logger" name = "Logger" />
+</group>
+ 

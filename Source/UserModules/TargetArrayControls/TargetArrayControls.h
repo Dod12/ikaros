@@ -1,6 +1,6 @@
 //
-//	MinimalModule.h		This file is a part of the IKAROS project
-// 						
+//	MyModule.h		This file is a part of the IKAROS project
+//
 //    Copyright (C) 2012 <Author Name>
 //
 //    This program is free software; you can redistribute it and/or modify
@@ -20,54 +20,33 @@
 //    See http://www.ikaros-project.org/ for more information.
 //
 
-
-#ifndef LidarSensor_
-#define LidarSensor_
+#ifndef TargetArrayControls_
+#define TargetArrayControls_
 
 #include "IKAROS.h"
 
-#include <rplidar.h>
-#include "sl_lidar.h"
-#include "sl_lidar_driver.h"
-
-#define N_LIDAR_SAMPLES 8192
-
-using namespace sl;
-
-class LidarSensor: public Module
+class TargetArrayControls: public Module
 {
 public:
-    static Module * Create(Parameter * p) { return new LidarSensor(p); }
+    static Module * Create(Parameter * p) { return new TargetArrayControls(p); }
 
-    LidarSensor(Parameter * p) : Module(p) {}
-    ~LidarSensor();
+    TargetArrayControls(Parameter * p) : Module(p) {}
+    virtual ~TargetArrayControls();
 
     void 		Init();
     void 		Tick();
+                
+    void        Command(std::string s, float x, float y, std::string value);
+    void        left();
+    void        right();
+    void        backward();
+    void        forward();
 
-    // Output arrays
+    // pointers to inputs and outputs
+    // and integers to represent their sizes
 
-    float * r_array;
-    int r_array_size;
-
-    float * theta_array;
-    int theta_array_size;
-
-    // Parameters
-
-    int baud_rate;
-    std::string serial_port = {};
-
-private:
-    float angle, distance, max_distance, x, y;
-    int x_index, y_index;
-
-    Result<IChannel*> channel = Result<IChannel*>(nullptr);
-    ILidarDriver* driver;
-    sl_result res;
-    sl_lidar_response_measurement_node_hq_t measurements[N_LIDAR_SAMPLES];
-    size_t measurements_array_size = N_LIDAR_SAMPLES;
+    float* target_array;
+    int target_array_size;
 };
 
 #endif
-

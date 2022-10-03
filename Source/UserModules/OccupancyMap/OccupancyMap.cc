@@ -73,6 +73,8 @@ OccupancyMap::Init()
     // Get input arrays
     io(r_array, r_array_size, "R_ARRAY");
     io(theta_array, theta_array_size, "THETA_ARRAY");
+    io(position, position_size, "POSITION");
+    io(heading, heading_size, "HEADING");
 
     // Set output matrix
     io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "GRID_MATRIX");
@@ -93,8 +95,11 @@ OccupancyMap::Tick()
     empty_cells.clear();
 
     for (int i = 0; i < r_array_size; ++i) {
-        float x = r_array[i] * cos(theta_array[i]);
-        float y = r_array[i] * sin(theta_array[i]);
+        float x_egocentric = r_array[i] * cos(theta_array[i]);
+        float y_egocentric = r_array[i] * sin(theta_array[i]);
+
+        float x = x*cos(heading[0]) - y_egocentric*sin(heading[0]) + position[0];
+        float y = x*sin(heading[0]) + y_egocentric*cos(heading[0]) + position[1];
 
         if (x >= max_distance) {
             std::cout << "X larger than max: " << x << std::endl;

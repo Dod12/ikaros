@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<group name="ODriveController" title="ODriveController Example">
+<group name="TargetArrayController" title="ODriveController Example">
 
 		<module
 			class = "TargetArrayControls"
@@ -15,7 +15,7 @@
 			input_filter_bandwidth = "2"
 		/>
 
-		<connection source="Controls.TARGET_ARRAY" target="Controller.TARGET_ARRAY" />
+		<connection source="Controls.TARGET_ARRAY" target="ODriveController.TARGET_ARRAY" />
 
 		<view name="ODrive" >
 			<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />

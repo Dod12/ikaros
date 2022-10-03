@@ -2,6 +2,9 @@
 
 <group title="LidarSensor Example">
 	
+	<module class = "Constant" name = "Position" data = "0 0" outputsize = "2" />
+	<module class = "Constant" name = "Heading" data = "0" outputsize = "1" />
+
 	<module
 		class = "LidarSensor"
 		name = "LidarSensor"
@@ -18,6 +21,8 @@
 
 	<connection source="LidarSensor.R_ARRAY" target="OccupancyMap.R_ARRAY" />
 	<connection source="LidarSensor.THETA_ARRAY" target="OccupancyMap.THETA_ARRAY" />
+	<connection source="Position.OUTPUT" target="OccupancyMap.POSITION" />
+	<connection source="Heading.OUTPUT" target="OccupancyMap.HEADING" />
   
 	<view  name = "LidarSensor">
 		<grid width="800" height="800" show_title = "true" flipYAxis="yes" flipYCanvas="yes" title= "Expected gridmap state" direction = "horizontal" source = "OccupancyMap.OCCUPANCY_MATRIX" x = "820" y = "10" valueLow="0" valueHigh="1"/>
