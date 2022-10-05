@@ -23,8 +23,8 @@
 	<input name="POSITION" description="x and y position of lidar sensor in allocentric space" size = "2" />
 	<input name="HEADING" description="Heading of lidarsensor in radians" size = "1" />
 
-	<output name="OCCUPANCY_MATRIX" description="Matrix of expected occupied cells in the grid" size_x="256" size_y="256" />
-	<output name="GRID_MATRIX" description="Matrix of positions of objects detected by the lidar sensor" size_x="256" size_y="256" />
+	<output name="OCCUPANCY_MATRIX" description="Matrix of expected occupied cells in the grid" size_x="128" size_y="128" />
+	<output name="GRID_MATRIX" description="Matrix of positions of objects detected by the lidar sensor" size_x="128" size_y="128" />
 
 	<link class="OccupancyMap" />
 

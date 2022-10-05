@@ -30,9 +30,8 @@ float prob_to_log_odds(float prob)
     return log(prob/(1-prob));
 }
 
-std::vector<std::pair<int, int>> interpolate_bresenham(float x, float y) {
+std::vector<std::pair<int, int>> interpolate_bresenham(int x0, int y0, float x, float y) {
     std::vector<std::pair<int, int>> points;
-    int x0 = 128, y0 = 128; // Centre of gridmap is at half the size.
     float dx = abs(x - x0);
     float dy = -abs(y - y0);
     int sx = x0 < x ? 1 : -1;
@@ -114,7 +113,7 @@ OccupancyMap::Tick()
         occupancy_matrix[x_index][y_index] += l_occupied - l_prior;
         grid_matrix[x_index][y_index] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
 
-        auto bresenham_cells = interpolate_bresenham(x_index, y_index);
+        auto bresenham_cells = interpolate_bresenham(occupancy_matrix_size_x / 2, occupancy_matrix_size_y / 2, x_index, y_index);
 
         empty_cells.insert(empty_cells.end(), bresenham_cells.begin(), bresenham_cells.end());
     }

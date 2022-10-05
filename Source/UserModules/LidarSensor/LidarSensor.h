@@ -67,6 +67,14 @@ private:
     sl_result res;
     sl_lidar_response_measurement_node_hq_t measurements[N_LIDAR_SAMPLES];
     size_t measurements_array_size = N_LIDAR_SAMPLES;
+
+    std::thread poller_thread;
+    std::mutex poller_mutex;
+    bool run_poller = true;
+
+    void poller(int millis);
+    bool get_poller();
+    void stop_poller();
 };
 
 #endif
