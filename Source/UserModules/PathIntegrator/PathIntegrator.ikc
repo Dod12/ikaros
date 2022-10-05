@@ -14,10 +14,10 @@
 		/>
 	</example>
 
-	<parameter name="wheelbase" description="Length of the wheelbase in meters" default="35.55" />
-	<parameter name="wheel_circumference" type="float" default="0.098182" description="Meters travelled in one rotation" />
+	<parameter name="wheelbase" description="Length of the wheelbase in meters" default="0.3555" />
+	<parameter name="wheel_circumference" type="float" default="0.098182" description="Meters travelled in one turn on the encoder, may differ from actual circumference if reduction gear is used." />
 
-	<input name="POS_ARRAY" description="Left and right axis estimator positions" size="2" />
+	<input name="ENCODER_COUNTS" description="Left and right axis estimator positions" size="2" />
 
 	<output name="POSITION" description="x, y coordinates for the robot" size="2" />
 	<output name="HEADING" description="Angle the robot is facing in radians" size="1" />

@@ -111,7 +111,7 @@ OccupancyMap::Tick()
 
         int x_index = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
         int y_index = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
-        occupancy_matrix[x_index][y_index] += l_occupied - occupancy_matrix[x_index][y_index];
+        occupancy_matrix[x_index][y_index] += l_occupied - l_prior;
         grid_matrix[x_index][y_index] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
 
         auto bresenham_cells = interpolate_bresenham(x_index, y_index);
@@ -120,7 +120,7 @@ OccupancyMap::Tick()
     }
 
     for (auto&& [x, y] : empty_cells) {
-        occupancy_matrix[x][y] += l_empty - occupancy_matrix[x][y];
+        occupancy_matrix[x][y] += l_empty - l_prior;
     }
 }
 

@@ -42,19 +42,13 @@ public:
     float wheelbase, circumference, r, omega;
     int ticks = 0;
 
-    float* pos_array;
-    int pos_array_size;
+    float* encoder_counts;
+    int encoder_counts_size;
 
-    float* prev_pos_array;
-    int prev_pos_array_size;
-
-    float* vel_array;
-    int vel_array_size;
+    float* prev_encoder_counts;
 
     float* position;
     int position_size;
-
-    float* position_turns;
 
     float* heading;
     int heading_size;

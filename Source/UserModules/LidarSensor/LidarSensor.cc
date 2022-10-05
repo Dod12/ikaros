@@ -60,6 +60,9 @@ LidarSensor::Init()
         fprintf(stderr, "Failed to connect to LIDAR %08x\r\n", res);
     }
     std::cout << "Initialization complete" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
+    if (SL_IS_FAIL(res)) throw;
 }
 
 void
@@ -67,16 +70,11 @@ LidarSensor::Tick()
 {
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
     if (SL_IS_OK(res)) {
-        res = driver->ascendScanData(measurements, measurements_array_size);
-        if (SL_IS_OK(res)) {
-            if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
-            
-            for (int i = 0; i < r_array_size; ++i) {
-                theta_array[i] = ((float) measurements[i].angle_z_q14 * 90.f / (1 << 14)) * 2 * M_PI / 360;
-                r_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
-            }
-        } else {
-            fprintf(stderr, "Failed to sort scan data: %i\r\n", res);
+        if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
+        
+        for (int i = 0; i < r_array_size; ++i) {
+            theta_array[i] = ((float) measurements[i].angle_z_q14 * 90.f / (1 << 14)) * 2 * M_PI / 360;
+            r_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
         }
     } else {
         fprintf(stderr, "Error while retrieving scan data: %i\r\n", res);

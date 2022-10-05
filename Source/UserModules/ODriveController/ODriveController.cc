@@ -51,11 +51,14 @@ ODriveController::Init()
     io(target_array, target_array_size, "TARGET_ARRAY");
     set_array(target_array, 0, target_array_size);
 
-    io(pos_array, pos_array_size, "POS_ESTIM");
+    io(pos_array, pos_array_size, "ENCODER_COUNTS");
     io(vel_array, vel_array_size, "VEL_ESTIM");
 
     offset_array_size = 2;
     offset_array = create_array(offset_array_size);
+
+    count_offset_array_size = 2;
+    count_offset_array = create_array(count_offset_array_size);
 
     // Init driver
     odrive = odrive::ODrive();
@@ -85,9 +88,11 @@ ODriveController::Init()
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         for (int i = 0; i < offset_array_size; ++i) {
             odrive.read(AXIS__ENCODER__POS_ESTIMATE + i*per_axis_offset, offset_array[i]);
+            odrive.read(AXIS__ENCODER__POS_ESTIMATE_COUNTS + 1*per_axis_offset, count_offset_array[i]);
         }
     } else {
         set_array(offset_array, 0, offset_array_size);
+        set_array(count_offset_array, 0, count_offset_array_size);
     }
 }
 
@@ -108,11 +113,11 @@ ODriveController::Tick()
         odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_right);
     }
 
-    float odom_left, odom_right;
-    odrive.read(AXIS__ENCODER__POS_ESTIMATE, odom_left);
-    odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, odom_right);
-    pos_array[0] = -1 * odom_left - offset_array[0]; 
-    pos_array[1] = odom_right - offset_array[1];
+    float left_cpr, right_cpr;
+    odrive.read(AXIS__ENCODER__POS_CPR_COUNTS, left_cpr);
+    odrive.read(AXIS__ENCODER__POS_CPR_COUNTS + per_axis_offset, right_cpr);
+    pos_array[0] = -1 * left_cpr - count_offset_array[0]; 
+    pos_array[1] = right_cpr - count_offset_array[1];
 }
 
 ODriveController::~ODriveController()
