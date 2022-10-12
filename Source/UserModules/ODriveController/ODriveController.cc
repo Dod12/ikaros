@@ -113,6 +113,11 @@ ODriveController::Tick()
         odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_right);
     }
 
+    float left_vel, right_vel;
+    odrive.read(AXIS__ENCODER__VEL_ESTIMATE, left_vel);
+    odrive.read(AXIS__ENCODER__VEL_ESTIMATE + per_axis_offset, right_vel);
+    vel_array[0] = -1 * left_vel;
+    vel_array[1] = right_vel;
     float left_cpr, right_cpr;
     odrive.read(AXIS__ENCODER__POS_CPR_COUNTS, left_cpr);
     odrive.read(AXIS__ENCODER__POS_CPR_COUNTS + per_axis_offset, right_cpr);

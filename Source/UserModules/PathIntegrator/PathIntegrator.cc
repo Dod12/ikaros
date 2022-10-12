@@ -41,79 +41,68 @@ PathIntegrator::Init()
     Bind(circumference, "wheel_circumference");
 
     io(encoder_counts, encoder_counts_size, "ENCODER_COUNTS");
+    io(vel_estim, vel_estim_size, "VEL_ESTIM");
 
     io(position, position_size, "POSITION");
     set_array(position, 0, position_size);
     io(heading, heading_size, "HEADING");
     set_array(heading, 0, heading_size);
 
-    prev_encoder_counts = create_array(encoder_counts_size);
-    set_array(prev_encoder_counts, 0, encoder_counts_size);
+    prev_values = create_array(encoder_counts_size);
+    set_array(prev_values, 0, encoder_counts_size);
 
     rotation_centre = create_array(position_size);
 }
 
 void
 PathIntegrator::Tick()
-{
-    if (ticks < 3) ++ticks; // Skip first few interations
-
-    float n_l = circumference * (encoder_counts[0] - prev_encoder_counts[0]) / (float) 8192;
-    float n_r = circumference * (encoder_counts[1] - prev_encoder_counts[1]) / (float) 8192;
-    
-    if ((abs(n_r) > 1e-2 || abs(n_l) > 1e-2) && ticks > 2 ){ // Only update position if significant movement AND some ticks have passed
-        float R = (wheelbase / 2) * (n_l + n_r) / (n_r - n_l);
-        float omega_delta_t =  (n_r + n_l) / wheelbase;
-        if (abs(R) > 25) { // If the radius of the arc is larger than 25 m, we can assume straight motion.
-            std::cout << "Moving straight" << std::endl;
-            float movement = (n_r + n_l) / 2;
-            position[0] += movement * cos(heading[0]);
-            position[1] += movement * sin(heading[0]);
-        } else { // Calculate arclength 
-            std::cout << "Moving in arc" << std::endl;
-            
-            rotation_centre[0] = position[0] - R * sin(heading[0]);
-            rotation_centre[1] = position[1] + R * cos(heading[0]);
-
-            float new_x = cos(omega_delta_t) * (position[0] - rotation_centre[0]) - sin(omega_delta_t) * (position[1] - rotation_centre[1]) + rotation_centre[0];
-            float new_y = sin(omega_delta_t) * (position[0] - rotation_centre[0]) + cos(omega_delta_t) * (position[1] - rotation_centre[1]) + rotation_centre[1];
-            position[0] = new_x;
-            position[1] = new_y;
-            heading[0] += omega_delta_t;
-/*
-            r = (wheelbase / 2) * (right_delta + left_delta) / (right_delta - left_delta);
-            omega = (right_delta - left_delta) / wheelbase;
-            std::cout << "Omega: " << omega << std::endl;
-
-            position[0] += r * (sin(omega + heading[0]) - sin(heading[0]));
-            position[1] -= r * (cos(omega + heading[0]) - cos(heading[0]));
-            heading[0] += omega; // TODO: FIX ME
-*/
-            /*
-            
-
-            rotation_centre[0] = position_turns[0] - r * sin(heading[0]);
-            rotation_centre[1] = position_turns[1] + r * cos(heading[0]);
-
-            float x_position = rotation_centre[0] + (position_turns[0] - rotation_centre[0]) * cos(omega) - (position_turns[1] - rotation_centre[1]) * sin(omega);
-            float y_position = rotation_centre[1] + (position_turns[0] - rotation_centre[0]) * sin(omega) + (position_turns[1] - rotation_centre[1]) * cos(omega);
-            position_turns[0] = x_position; position_turns[1] = y_position;
-            heading[0] = heading[0] + omega;
-            */
-        }
-        std::cout << "OUTPUT: X: " << position[0] << ", Y: " << position[1] << ", Heading: " << heading[0] << std::endl;
-        prev_encoder_counts[0] = encoder_counts[0];
-        prev_encoder_counts[1] = encoder_counts[1];
-    } else {
-        // No movement
-        prev_encoder_counts[0] = encoder_counts[0];
-        prev_encoder_counts[1] = encoder_counts[1];
+{       
+    /*
+    if (prev_values[0] == 0 && prev_values[1] == 0) { // On the first tick, we need to initialize the encoder counts.
+        prev_values[0] = encoder_counts[0];
+        prev_values[1] = encoder_counts[1];
+        return;
     }
+    */
+    //if (ticks != 10) { ++ticks; return; } // Run every 4th tick.
+
+    /*
+    float n_l = circumference * (encoder_counts[0] - prev_values[0]) / (float) 8192;
+    float n_r = circumference * (encoder_counts[1] - prev_values[1]) / (float) 8192;
+    */
+
+    float n_l = circumference * vel_estim[0] * 1/10;
+    float n_r = circumference * vel_estim[1] * 1/10;
+
+    if (abs(n_l) < 1e-5 && abs(n_r) < 1e-5) { return; } // Skip updating the path if no movements.
+
+    float R = (wheelbase / 2) * (n_l + n_r) / (n_r - n_l);
+    float omega_delta_t =  (n_r + n_l) / wheelbase;
+    if (abs(R) >= 10) { // If  the radius of the arc is larger than 25 m, we can assume straight motion.
+        std::cout << "Moving straight, R: " << R << std::endl;
+        float movement = (n_r + n_l) / 2;
+        position[0] += movement * cos(heading[0]);
+        position[1] += movement * sin(heading[0]);
+    } else { // Calculate arclength 
+        std::cout << "Moving in arc, R: " << R << std::endl;
+        
+        rotation_centre[0] = position[0] - R * sin(heading[0]);
+        rotation_centre[1] = position[1] + R * cos(heading[0]);
+
+        float new_x = cos(omega_delta_t) * (position[0] - rotation_centre[0]) - sin(omega_delta_t) * (position[1] - rotation_centre[1]) + rotation_centre[0];
+        float new_y = sin(omega_delta_t) * (position[0] - rotation_centre[0]) + cos(omega_delta_t) * (position[1] - rotation_centre[1]) + rotation_centre[1];
+        position[0] = new_x;
+        position[1] = new_y;
+        heading[0] = remainder(heading[0] + omega_delta_t, 2*M_PI);
+    }
+    std::cout << "OUTPUT: X: " << position[0] << ", Y: " << position[1] << ", Heading: " << heading[0] << std::endl;
+    prev_values[0] = encoder_counts[0];
+    prev_values[1] = encoder_counts[1];
 }
 
 PathIntegrator::~PathIntegrator()
 {
-    destroy_array(prev_encoder_counts);
+    destroy_array(prev_values);
     destroy_array(rotation_centre);
 }
 

@@ -45,7 +45,10 @@ public:
     float* encoder_counts;
     int encoder_counts_size;
 
-    float* prev_encoder_counts;
+    float* vel_estim;
+    int vel_estim_size;
+
+    float* prev_values;
 
     float* position;
     int position_size;

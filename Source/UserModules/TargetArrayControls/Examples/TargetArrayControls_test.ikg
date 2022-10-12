@@ -55,6 +55,7 @@
 	<connection source="Position.POSITION" target="OccupancyMap.POSITION" delay="0" />
 	<connection source="Position.HEADING" target="OccupancyMap.HEADING" delay="0" />
 	<connection source="Controller.ENCODER_COUNTS" target="Position.ENCODER_COUNTS" delay="0" />
+	<connection source="Controller.VEL_ESTIM" target="Position.VEL_ESTIM" delay="0" />
 
 	<module class = "Logger" name = "Logger" />
 </group>

@@ -62,6 +62,7 @@ LidarSensor::Init()
     std::cout << "Initialization complete" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(10));
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     if (SL_IS_FAIL(res)) throw;
     std::thread poller_thread(&LidarSensor::poller, this, 100);
     poller_thread.detach();
