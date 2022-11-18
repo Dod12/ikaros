@@ -1,8 +1,8 @@
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(libusb)
+#find_package(libusb)
 
-if (LIBUSB_LIB_FOUND)
+if (true)
 
 	set(SOURCE
 		${SOURCE}
@@ -13,13 +13,15 @@ if (LIBUSB_LIB_FOUND)
 
 	set(MODULES_INCLUDS
 		${MODULES_INCLUDS}
-		${LIBUSB_INCLUDE_DIR}
+		#${LIBUSB_INCLUDE_DIR}
+		/opt/homebrew/Cellar/libusb/1.0.26/include/libusb-1.0/
 		PARENT_SCOPE
 		)
 
 	set(MODULES_LIBS
 		${MODULES_LIBS}
-		${LIBUSB_LIBRARIES}
+		#${LIBUSB_LIBRARIES}
+		/opt/homebrew/Cellar/libusb/1.0.26/lib/libusb-1.0.0.dylib
 		PARENT_SCOPE
 		)
 

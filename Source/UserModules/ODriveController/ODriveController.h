@@ -53,9 +53,6 @@ public:
     float* offset_array;
     int offset_array_size;
 
-    float* count_offset_array;
-    int count_offset_array_size;
-
     int control_mode;
     int input_mode;
 

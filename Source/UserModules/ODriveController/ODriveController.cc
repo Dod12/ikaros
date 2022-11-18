@@ -51,18 +51,18 @@ ODriveController::Init()
     io(target_array, target_array_size, "TARGET_ARRAY");
     set_array(target_array, 0, target_array_size);
 
-    io(pos_array, pos_array_size, "ENCODER_COUNTS");
+    io(pos_array, pos_array_size, "POS_ESTIM");
     io(vel_array, vel_array_size, "VEL_ESTIM");
 
     offset_array_size = 2;
     offset_array = create_array(offset_array_size);
 
-    count_offset_array_size = 2;
-    count_offset_array = create_array(count_offset_array_size);
-
     // Init driver
     odrive = odrive::ODrive();
-    if (odrive.search_device() != odrive::ReturnStatus::STATUS_SUCCESS) throw "Could not find ODrive";
+    if (odrive.search_device() != odrive::ReturnStatus::STATUS_SUCCESS) {
+        fprintf(stderr, "Failed to find ODrive\r\n");
+        return;
+    }
 
     for (auto offset : std::vector<int>{0, per_axis_offset})
 
@@ -88,41 +88,39 @@ ODriveController::Init()
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         for (int i = 0; i < offset_array_size; ++i) {
             odrive.read(AXIS__ENCODER__POS_ESTIMATE + i*per_axis_offset, offset_array[i]);
-            odrive.read(AXIS__ENCODER__POS_ESTIMATE_COUNTS + 1*per_axis_offset, count_offset_array[i]);
         }
     } else {
         set_array(offset_array, 0, offset_array_size);
-        set_array(count_offset_array, 0, count_offset_array_size);
     }
 }
 
 void
 ODriveController::Tick()
 {   
-    // We need to invert the left desired pos, since the axes are mirrored
-    float target_left = -1 * target_array[0] + offset_array[0];
-    float target_right = target_array[1] + offset_array[1];
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
+        // We need to invert the left desired pos, since the axes are mirrored
+        float target_left = circumference * (-1 * target_array[0]) + offset_array[0];
+        float target_right = circumference * target_array[1] + offset_array[1];
         odrive.write(AXIS__CONTROLLER__INPUT_POS, target_left);
         odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_right);
     } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) { 
-        odrive.write(AXIS__CONTROLLER__INPUT_VEL, target_left);
-        odrive.write(AXIS__CONTROLLER__INPUT_VEL + per_axis_offset, target_right);
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL, target_array[0]);
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL + per_axis_offset, target_array[1]);
     } else if (control_mode == ControlMode::CONTROL_MODE_TORQUE_CONTROL) {
-        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE, target_left);
-        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_right);
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE, target_array[0]);
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_array[1]);
     }
 
     float left_vel, right_vel;
     odrive.read(AXIS__ENCODER__VEL_ESTIMATE, left_vel);
     odrive.read(AXIS__ENCODER__VEL_ESTIMATE + per_axis_offset, right_vel);
-    vel_array[0] = -1 * left_vel;
-    vel_array[1] = right_vel;
-    float left_cpr, right_cpr;
-    odrive.read(AXIS__ENCODER__POS_CPR_COUNTS, left_cpr);
-    odrive.read(AXIS__ENCODER__POS_CPR_COUNTS + per_axis_offset, right_cpr);
-    pos_array[0] = -1 * left_cpr - count_offset_array[0]; 
-    pos_array[1] = right_cpr - count_offset_array[1];
+    vel_array[0] = -1 * left_vel / circumference;
+    vel_array[1] = right_vel / circumference;
+    float left_pos, right_pos;
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE, left_pos);
+    odrive.read(AXIS__ENCODER__POS_ESTIMATE + per_axis_offset, right_pos);
+    pos_array[0] = circumference * (-1 * left_pos) - offset_array[0]; 
+    pos_array[1] = circumference * right_pos - offset_array[1];
 }
 
 ODriveController::~ODriveController()

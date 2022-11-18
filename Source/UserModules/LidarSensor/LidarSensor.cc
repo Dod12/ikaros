@@ -63,9 +63,12 @@ LidarSensor::Init()
     std::this_thread::sleep_for(std::chrono::seconds(10));
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    if (SL_IS_FAIL(res)) throw;
+    if (SL_IS_OK(res)) {
     std::thread poller_thread(&LidarSensor::poller, this, 100);
     poller_thread.detach();
+    } else {
+        fprintf(stderr, "Failed to get scan data from LIDAR %08x. Will not scan environment!\r\n", res);
+    }
 }
 
 void
