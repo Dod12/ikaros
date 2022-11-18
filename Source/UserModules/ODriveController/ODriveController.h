@@ -50,6 +50,9 @@ public:
     float* vel_array;
     int vel_array_size;
 
+    float* robot_speed;
+    int robot_speed_size = 1;
+
     float* offset_array;
     int offset_array_size;
 

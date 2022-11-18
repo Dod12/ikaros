@@ -54,6 +54,8 @@ ODriveController::Init()
     io(pos_array, pos_array_size, "POS_ESTIM");
     io(vel_array, vel_array_size, "VEL_ESTIM");
 
+    io(robot_speed, robot_speed_size, "ROBOT_SPEED");
+
     offset_array_size = 2;
     offset_array = create_array(offset_array_size);
 
@@ -88,6 +90,7 @@ ODriveController::Init()
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         for (int i = 0; i < offset_array_size; ++i) {
             odrive.read(AXIS__ENCODER__POS_ESTIMATE + i*per_axis_offset, offset_array[i]);
+            odrive.read(AXIS__CONTROLLER__)
         }
     } else {
         set_array(offset_array, 0, offset_array_size);
