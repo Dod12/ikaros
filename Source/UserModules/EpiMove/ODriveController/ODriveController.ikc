@@ -43,8 +43,9 @@
 	<parameter name="gear_reduction" type="float" default="6.4" description="Gear reduction ratio" />
 	<parameter name="start_speed" type="float" default="0.1" description="Start speed for the motor in m/s" />
 
-	<input name="POS_TARGET" description="Left and right axis target positions" size="2" />
-	<input name="VEL_TARGET" description="Left and right axis target velocities" size="2" />
+	<input name="POS_TARGET" description="Left and right axis target positions in m" size="2" />
+	<input name="VEL_TARGET" description="Left and right axis target velocities in m/s" size="2" />
+	<input name="TORQUE_TARGET" description="Left and right axis target torque" size="2" />
 	<output name="POS_ESTIM" description="Left and right measured encoder positions" size="2" />
 	<output name="VEL_ESTIM" description="Left and right measured encoder velocities" size="2" />
 

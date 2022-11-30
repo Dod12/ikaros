@@ -77,7 +77,7 @@ ODriveController::Init()
     // Bind input and output arrays
     io(target_pos_array, target_pos_array_size, "POS_TARGET"); // Target position in m on each axis, 0=left, 1=right
     io(target_vel_array, target_vel_array_size, "VEL_TARGET"); // Target velocity in m/s on each axis, 0=left, 1=right
-    io(target_torque_array, target_torque_array_size, "TORQUE_TARGET");
+    io(target_torque_array, target_torque_array_size, "TORQUE_TARGET"); // Target torque on each axis, 0=left, 1=right
 
     io(pos_array, pos_array_size, "POS_ESTIM"); 
     io(vel_array, vel_array_size, "VEL_ESTIM"); 

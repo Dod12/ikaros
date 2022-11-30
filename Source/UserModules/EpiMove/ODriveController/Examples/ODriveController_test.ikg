@@ -15,7 +15,7 @@
 			input_filter_bandwidth = "2"
 		/>
 
-		<connection source="Controls.TARGET_ARRAY" target="Controller.TARGET_ARRAY" />
+		<connection source="Controls.TARGET_ARRAY" target="Controller.POS_TARGET" />
 
 		<view name="ODrive" >
 			<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />
@@ -27,7 +27,5 @@
 			<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
 			<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
 		</view>
-
-    	<module class = "Logger" name = "Logger" />
 </group>
  
