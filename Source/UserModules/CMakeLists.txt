@@ -5,12 +5,7 @@ add_subdirectory(MyModule)
 add_subdirectory(MotorControl)
 add_subdirectory(CameraSimulate)
 add_subdirectory(MTPupilDemo)
-add_subdirectory(LidarSensor)
-add_subdirectory(OccupancyMap)
-add_subdirectory(TransitionMatrix)
-add_subdirectory(ODriveController)
-add_subdirectory(TargetArrayControls)
-add_subdirectory(PathIntegrator)
+add_subdirectory(EpiMove)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)
