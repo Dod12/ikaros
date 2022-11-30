@@ -80,24 +80,25 @@ ODriveController::Init()
     io(target_torque_array, target_torque_array_size, "TORQUE_TARGET"); // Target torque on each axis, 0=left, 1=right
 
     io(pos_array, pos_array_size, "POS_ESTIM"); 
-    io(vel_array, vel_array_size, "VEL_ESTIM"); 
+    io(vel_array, vel_array_size, "VEL_ESTIM");
 }
 
 void
 ODriveController::Tick()
 {   
-    static const int turns_per_meter = 1 / (wheel_circumference * gear_reduction);
+    static const float turns_per_meter = 1 / (wheel_circumference * gear_reduction);
 
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         // We need to invert the left desired pos, since the axes are mirrored
-        odrive.write(AXIS__CONTROLLER__POS_SETPOINT + 0, -target_pos_array[0] * turns_per_meter);
-        odrive.write(AXIS__CONTROLLER__POS_SETPOINT + per_axis_offset, target_pos_array[1] * turns_per_meter);
+        fprintf(stderr, "Got command: %f, %f\r\n", -target_pos_array[0] * turns_per_meter, target_pos_array[1] * turns_per_meter);
+        odrive.write(AXIS__CONTROLLER__INPUT_POS + 0, -target_pos_array[0] * turns_per_meter);
+        odrive.write(AXIS__CONTROLLER__INPUT_POS + per_axis_offset, target_pos_array[1] * turns_per_meter);
     } else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) { 
-        odrive.write(AXIS__CONTROLLER__VEL_SETPOINT + 0, -target_vel_array[0] * turns_per_meter);
-        odrive.write(AXIS__CONTROLLER__VEL_SETPOINT + per_axis_offset, target_vel_array[1] * turns_per_meter);
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL + 0, -target_vel_array[0] * turns_per_meter);
+        odrive.write(AXIS__CONTROLLER__INPUT_VEL + per_axis_offset, target_vel_array[1] * turns_per_meter);
     } else if (control_mode == ControlMode::CONTROL_MODE_TORQUE_CONTROL) {
-        odrive.write(AXIS__CONTROLLER__TORQUE_SETPOINT + 0, -target_torque_array[0]);
-        odrive.write(AXIS__CONTROLLER__TORQUE_SETPOINT + per_axis_offset, target_torque_array[1]);
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + 0, -target_torque_array[0]);
+        odrive.write(AXIS__CONTROLLER__INPUT_TORQUE + per_axis_offset, target_torque_array[1]);
     }
 
     // Read position and velocity
@@ -121,4 +122,4 @@ ODriveController::~ODriveController()
 
 // Install the module. This code is executed during start-up.
 
-static InitClass init("ODriveController", &ODriveController::Create, "Source/UserModules/ODriveController/");
+static InitClass init("ODriveController", &ODriveController::Create, "Source/UserModules/EpiMove/ODriveController/");

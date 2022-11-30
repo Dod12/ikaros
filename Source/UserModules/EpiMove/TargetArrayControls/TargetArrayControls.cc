@@ -82,4 +82,4 @@ void TargetArrayControls::forward() {
 
 // Install the module. This code is executed during start-up.
 
-static InitClass init("TargetArrayControls", &TargetArrayControls::Create, "Source/UserModules/TargetArrayControls/");
+static InitClass init("TargetArrayControls", &TargetArrayControls::Create, "Source/UserModules/EpiMove/TargetArrayControls/");

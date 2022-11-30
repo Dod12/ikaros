@@ -70,7 +70,7 @@ ODriveController::Init()
 
     {
         // Set desired mode (position/veolcity) and input filtering
-        odrive.write(AXIS__CONTROLLER__CONFIG__CONTROL_MODE + offset, control_mode);
+        odrive.write(AXIS__CONTROLLER__C    ONFIG__CONTROL_MODE + offset, control_mode);
 
         odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_MODE + offset, input_mode);
 
