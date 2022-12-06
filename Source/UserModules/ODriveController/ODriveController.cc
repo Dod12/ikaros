@@ -70,7 +70,7 @@ ODriveController::Init()
 
     {
         // Set desired mode (position/veolcity) and input filtering
-        odrive.write(AXIS__CONTROLLER__C    ONFIG__CONTROL_MODE + offset, control_mode);
+        odrive.write(AXIS__CONTROLLER__CONFIG__CONTROL_MODE + offset, control_mode);
 
         odrive.write(AXIS__CONTROLLER__CONFIG__INPUT_MODE + offset, input_mode);
 
@@ -90,7 +90,6 @@ ODriveController::Init()
     if (control_mode == ControlMode::CONTROL_MODE_POSITION_CONTROL) {
         for (int i = 0; i < offset_array_size; ++i) {
             odrive.read(AXIS__ENCODER__POS_ESTIMATE + i*per_axis_offset, offset_array[i]);
-            odrive.read(AXIS__CONTROLLER__)
         }
     } else {
         set_array(offset_array, 0, offset_array_size);

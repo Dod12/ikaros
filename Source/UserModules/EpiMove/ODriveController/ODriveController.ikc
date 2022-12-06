@@ -36,7 +36,7 @@
 	</example>
 
 	<parameter name="control_mode" type="int" default="3" description="Unit used for specifying target axis behaviour." />
-	<parameter name="input_mode" type="int" default="0" description="Input filtering applied to the axis" />
+	<parameter name="input_mode" type="int" default="1" description="Input filtering applied to the axis" />
 	<parameter name="input_filter_bandwidth" type="float" default="1" description="Filter width applied to input position signal" />
 	<parameter name="vel_ramp_rate" type="float" default="0.5" description="Maximum acceleration when using velocity input" />
 	<parameter name="wheel_circumference" type="float" default="0.62832" description="Wheel circumference" />

@@ -106,23 +106,41 @@ template <typename T>
 ReturnStatus ODrive::read(short endpoint, T& value) {
     bytes request_payload;
     bytes response_payload;
+    ReturnStatus status;
 
-    if (transaction(endpoint, sizeof(value), request_payload, response_payload, true) != STATUS_SUCCESS) {return STATUS_ERROR;}
+    try {
+        status = transaction(endpoint, sizeof(value), request_payload, response_payload, true);
+        if (response_payload.size() != sizeof(value)) {
+            fprintf(stderr, "Invalid response size\n");
+            return STATUS_ERROR;
+        }
+        std::memcpy(&value, &response_payload[0], sizeof(value));
+    } catch (std::exception& e) {
+        fprintf(stderr, "Error reading from endpoint %d: %s\n", endpoint, e.what());
+        status = STATUS_ERROR;
+    }
 
-    std::memcpy(&value, &response_payload[0], sizeof(value));
-    return STATUS_SUCCESS;
+    return status;
 }
 
 template <typename T>
 ReturnStatus ODrive::write(short endpoint, const T& value) {
     bytes request_payload;
     bytes response_payload;
+    ReturnStatus status;
 
-    for (size_t i = 0; i < sizeof(value); ++i) {
-        request_payload.emplace_back(((unsigned char*)&value)[i]);
+    try {
+        request_payload.resize(sizeof(value));
+        for (int i = 0; i < sizeof(value); i++) {
+            request_payload.emplace_back(((unsigned char*)&value)[i]);
+        }
+        status = transaction(endpoint, 0, request_payload, response_payload, true);
+    } catch (std::exception& e) {
+        fprintf(stderr, "Error writing to endpoint %d: %s\n", endpoint, e.what());
+        status = STATUS_ERROR;
     }
 
-    return transaction(endpoint, 0, request_payload, response_payload, true);
+    return status;
 }
 
 ReturnStatus ODrive::call(short endpoint) {

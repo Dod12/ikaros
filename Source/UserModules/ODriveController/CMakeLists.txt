@@ -13,15 +13,13 @@ if (true)
 
 	set(MODULES_INCLUDS
 		${MODULES_INCLUDS}
-		#${LIBUSB_INCLUDE_DIR}
-		/opt/homebrew/Cellar/libusb/1.0.26/include/libusb-1.0/
+		${LIBUSB_INCLUDE_DIR}
 		PARENT_SCOPE
 		)
 
 	set(MODULES_LIBS
 		${MODULES_LIBS}
-		#${LIBUSB_LIBRARIES}
-		/opt/homebrew/Cellar/libusb/1.0.26/lib/libusb-1.0.0.dylib
+		${LIBUSB_LIBRARIES}
 		PARENT_SCOPE
 		)
 
