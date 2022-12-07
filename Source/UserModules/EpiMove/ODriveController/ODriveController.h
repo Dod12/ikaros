@@ -25,8 +25,6 @@
 
 #include "IKAROS.h"
 
-#include "odrive/odrive.h"
-
 class ODriveController: public Module
 {
 public:
@@ -61,7 +59,7 @@ public:
     float* vel_array;
     int vel_array_size;
 
-    odrive::ODrive odrive;
+    odrive::ODriveSerial odrive;
 };
 
 #endif

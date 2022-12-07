@@ -9,7 +9,7 @@
 
 // This file is for the 5.3.0 firmware version
 
-namespace odrive::enums {
+namespace ODrive {
 // ODrive.GpioMode
     enum GpioMode {
         GPIO_MODE_DIGITAL = 0,
@@ -198,5 +198,5 @@ namespace odrive::enums {
         SENSORLESS_ESTIMATOR_ERROR_UNSTABLE_GAIN = 0x00000001,
         SENSORLESS_ESTIMATOR_ERROR_UNKNOWN_CURRENT_MEASUREMENT = 0x00000002,
     };
-} // namespace odrive::enums
+} // namespace ODrive
 #endif

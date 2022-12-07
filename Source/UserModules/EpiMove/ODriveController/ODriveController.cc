@@ -27,15 +27,7 @@
 // this is preferred to using <cmath>
 
 using namespace ikaros;
-using namespace odrive::endpoints;
-using namespace odrive::enums;
-
-template <typename ValueType>
-void safe_write(odrive::ODrive& odrive, const short endpoint, const ValueType value) {
-    if (odrive.write(endpoint, value) == odrive::ReturnStatus::STATUS_ERROR) {
-        std::cerr << "Error writing " << value << " to endpoint " << endpoint << std::endl;
-    }
-}
+using namespace ODrive;
 
 void
 ODriveController::Init()
