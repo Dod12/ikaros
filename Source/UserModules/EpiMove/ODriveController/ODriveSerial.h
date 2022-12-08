@@ -19,6 +19,8 @@
 //
 //    See http://www.ikaros-project.org/ for more information.
 //
+#ifndef ODriveSerial_
+#define ODriveSerial_
 
 #include "IKAROS.h"
 #include <iostream>
@@ -39,17 +41,30 @@ namespace ODrive {
         TIMEOUT = 2
     };
 
+    template <typename T>
+    struct Motors
+    {
+        T left;
+        T right;
+
+        Motors(T left, T right)
+        {
+            this->left = left;
+            this->right = right;
+        }
+    };
+
+    struct Feedback
+    {
+        float position;
+        float velocity;
+    };
+
     class ODriveSerial: public Serial
     {
     private:
         ODrive::ReturnStatus SendCommand(const std::string& command);
-        std::string ReadString();
-        std::string ReadString(const std::string& command);
         std::vector<std::string> Tokenize(std::string str, const std::string& delimiter);
-        int ReadInt();
-        int ReadInt(const std::string& command);
-        float ReadFloat();
-        float ReadFloat(const std::string& command);
 
         const char * device_name;
         unsigned long baud_rate;
@@ -60,6 +75,13 @@ namespace ODrive {
 
         explicit ODriveSerial(const char * serial_device, unsigned long baud_rate = DEFAULT_BAUD_RATE, unsigned long timeout = COMMAND_TIMEOUT);
         explicit ODriveSerial(const std::string& serial_device, unsigned long baud_rate = DEFAULT_BAUD_RATE, unsigned long timeout = COMMAND_TIMEOUT);
+
+        int ReadInt();
+        int ReadInt(const std::string& command);
+        float ReadFloat();
+        float ReadFloat(const std::string& command);
+        std::string ReadString();
+        std::string ReadString(const std::string& command);
 
         ODrive::ReturnStatus SetAxisState(int axis, int state, int timeout = 1000, bool wait_for_idle = false);
         ODrive::ReturnStatus SetState(int state, int timeout = 1000, bool wait_for_idle = false);
@@ -89,17 +111,17 @@ namespace ODrive {
 
         float GetAxisParameterFloat(int axis, const std::string& parameter);
         int GetAxisParameterInt(int axis, const std::string& parameter);
-        std::pair<float, float> GetParameterFloat(const std::string& parameter);
-        std::pair<int, int> GetParameterInt(const std::string& parameter);
+        Motors<float> GetParameterFloat(const std::string& parameter);
+        Motors<int> GetParameterInt(const std::string& parameter);
 
-        std::pair<float, float> GetAxisFeedback(int axis);
-        std::pair<std::array<float, 2>, std::array<float, 2>> GetFeedback();
+        Feedback GetAxisFeedback(int axis);
+        Motors<Feedback> GetFeedback();
 
         float GetAxisPos(int axis);
-        std::array<float, 2> GetPos();
+        Motors<float> GetPos();
 
         float GetAxisVel(int axis);
-        std::array<float, 2> GetVel();
+        Motors<float> GetVel();
 
         ODrive::ReturnStatus SaveConfiguration();
         ODrive::ReturnStatus EraseConfiguration();
@@ -107,3 +129,5 @@ namespace ODrive {
         ODrive::ReturnStatus ClearErrors();
     };
 } // namespace ODrive
+
+#endif

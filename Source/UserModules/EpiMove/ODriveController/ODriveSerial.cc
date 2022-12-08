@@ -24,6 +24,17 @@
 
 namespace ODrive {
 
+    template <typename T>
+    Motors<T> make_motors(T left, T right)
+    {
+        return Motors<T>(left, right);
+    }
+
+    Feedback make_feedback(float position, float velocity)
+    {
+        return Feedback{position, velocity};
+    }
+
     ODrive::ODriveSerial::ODriveSerial(const char * device_name, unsigned long baud_rate, unsigned long timeout)
             : Serial(device_name, baud_rate)
     {
@@ -41,10 +52,17 @@ namespace ODrive {
     }
 
     ReturnStatus ODriveSerial::SendCommand(const std::string& command)
-    {
-        int response = SendString(command.c_str());
-        if (response != 0)
+    {   
+        std::string command_with_newline = command;
+        if (command[command.length() - 1] != '\n')
         {
+            command_with_newline += '\n';
+        }
+        const char *command_cstr = command_with_newline.c_str();
+        int bytes_written = SendString(command_cstr);
+        if (bytes_written == 0)
+        {
+            std::cerr << "Error writing command to ODrive" << std::endl;
             return ReturnStatus::ERROR;
         }
         else
@@ -159,8 +177,8 @@ namespace ODrive {
             do
             {
                 usleep(50);
-                axis0_state = ReadInt("odrive0.axis0.current_state"); 
-                axis1_state = ReadInt("odrive0.axis1.current_state");
+                axis0_state = ReadInt("r axis0.current_state"); 
+                axis1_state = ReadInt("r axis1.current_state");
 
                 counter++;
                 if (counter > timeout/50)
@@ -431,9 +449,9 @@ namespace ODrive {
         return ReadFloat(command);
     }
 
-    std::pair<float, float> ODriveSerial::GetParameterFloat(const std::string& parameter)
+    Motors<float> ODriveSerial::GetParameterFloat(const std::string& parameter)
     {
-        return std::make_pair(GetAxisParameterFloat(0, parameter),
+        return make_motors(GetAxisParameterFloat(0, parameter),
                               GetAxisParameterFloat(1, parameter));
     }
 
@@ -443,13 +461,13 @@ namespace ODrive {
         return ReadInt(command);
     }
 
-    std::pair<int, int> ODriveSerial::GetParameterInt(const std::string& parameter)
+    Motors<int> ODriveSerial::GetParameterInt(const std::string& parameter)
     {
-        return std::make_pair(GetAxisParameterInt(0, parameter),
+        return make_motors(GetAxisParameterInt(0, parameter),
                               GetAxisParameterInt(1, parameter));
     }
 
-    std::pair<float, float> ODriveSerial::GetAxisFeedback(int axis)
+    Feedback ODriveSerial::GetAxisFeedback(int axis)
     {
         std::string command = "f " + std::to_string(axis);
         std::string response = ReadString(command);
@@ -457,40 +475,37 @@ namespace ODrive {
         if (tokens.size() != 2)
         {
             std::cerr << "Error getting axis feedback" << std::endl;
-            return std::make_pair(0.0f, 0.0f);
+            return make_feedback(0.0f, 0.0f);
         }
         else
         {
-            return std::make_pair(std::stof(tokens[0]), std::stof(tokens[1]));
+            return make_feedback(std::stof(tokens[0]), std::stof(tokens[1]));
         }
     }
 
-    std::pair<std::array<float, 2>, std::array<float, 2>> ODriveSerial::GetFeedback()
+    Motors<Feedback> ODriveSerial::GetFeedback()
     {   
-        std::pair<float, float> axis0 = GetAxisFeedback(0);
-        std::pair<float, float> axis1 = GetAxisFeedback(1);
-        return std::make_pair(std::array<float, 2>{axis0.first, axis1.first},
-                              std::array<float, 2>{axis0.second, axis1.second});
+        return make_motors(GetAxisFeedback(0), GetAxisFeedback(1));
     }
 
     float ODriveSerial::GetAxisPos(int axis)
     {
-        return GetAxisFeedback(axis).first;
+        return GetAxisFeedback(axis).position;
     }
 
-    std::array<float, 2> ODriveSerial::GetPos()
+    Motors<float> ODriveSerial::GetPos()
     {
-        return std::array<float, 2>{GetAxisPos(0), GetAxisPos(1)};
+        return make_motors(GetAxisPos(0), GetAxisPos(1));
     }
 
     float ODriveSerial::GetAxisVel(int axis)
     {
-        return GetAxisFeedback(axis).second;
+        return GetAxisFeedback(axis).velocity;
     }
 
-    std::array<float, 2> ODriveSerial::GetVel()
+    Motors<float> ODriveSerial::GetVel()
     {
-        return std::array{GetAxisVel(0), GetAxisVel(1)};
+        return make_motors(GetAxisVel(0), GetAxisVel(1));
     }
 
     ReturnStatus ODriveSerial::SaveConfiguration()

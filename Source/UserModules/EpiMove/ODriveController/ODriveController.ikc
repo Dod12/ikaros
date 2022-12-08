@@ -32,9 +32,12 @@
 			name="ODriveController"
 			control_mode = "3"
 			input_mode = "3"
+			serial_port = "/dev/tty.usbmodem206839A14D4D1"
 		/>
 	</example>
 
+	<parameter name="serial_port" type="string" description="Serial port to connect to" optional="false" />
+	<parameter name="baudrate" type="int" default="115200" description="Baudrate for serial connection" />
 	<parameter name="control_mode" type="int" default="3" description="Unit used for specifying target axis behaviour." />
 	<parameter name="input_mode" type="int" default="1" description="Input filtering applied to the axis" />
 	<parameter name="input_filter_bandwidth" type="float" default="1" description="Filter width applied to input position signal" />

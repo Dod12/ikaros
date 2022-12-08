@@ -24,6 +24,10 @@
 #define ODriveController_
 
 #include "IKAROS.h"
+#include "ODriveSerial.h"
+#include "ODriveEnums.h"
+
+#include <iostream>
 
 class ODriveController: public Module
 {
@@ -39,10 +43,15 @@ public:
     // pointers to inputs and outputs
     // and integers to represent their sizes
 
+    ODrive::ODriveSerial* odrive;
+
     float gear_reduction, wheel_circumference, speed;
 
     int control_mode, input_mode;
     float input_filter_bandwidth, vel_ramp_rate;
+
+    std::string serial_port;
+    int baud_rate;
 
     float* target_pos_array;
     int target_pos_array_size;
@@ -58,8 +67,6 @@ public:
 
     float* vel_array;
     int vel_array_size;
-
-    odrive::ODriveSerial odrive;
 };
 
 #endif
