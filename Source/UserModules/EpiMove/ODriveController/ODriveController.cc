@@ -65,13 +65,13 @@ ODriveController::Init()
     input_mode = (int) (InputMode) input_mode;
 
     // Set parameters for motor controller
-    odrive->SetParameter("contoller.config.control_mode", control_mode);
-    odrive->SetParameter("contoller.config.input_mode", input_mode);
-    odrive->SetParameter("contoller.config.input_filter_bandwidth", input_filter_bandwidth);
-    odrive->SetParameter("contoller.config.vel_ramp_rate", vel_ramp_rate);
+    odrive->SetParameter("controller.config.control_mode", control_mode);
+    odrive->SetParameter("controller.config.input_mode", input_mode);
+    odrive->SetParameter("controller.config.input_filter_bandwidth", input_filter_bandwidth);
+    odrive->SetParameter("controller.config.vel_ramp_rate", vel_ramp_rate);
 
-    auto control_modes = odrive->GetParameterInt("contoller.config.control_mode");
-    auto input_modes = odrive->GetParameterInt("contoller.config.input_mode");
+    auto control_modes = odrive->GetParameterInt("controller.config.control_mode");
+    auto input_modes = odrive->GetParameterInt("controller.config.input_mode");
 
     std::cout << "Control mode axis 0: " << control_modes.left << ", control mode axis 1: " << control_modes.right << std::endl;
     std::cout << "Input mode axis 0: " << control_modes.left << ", input mode axis 1: " << control_modes.right << std::endl;

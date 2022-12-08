@@ -74,8 +74,7 @@ namespace ODrive {
     std::string ODriveSerial::ReadString()
     {
         char * response = new char[MAX_RESPONSE_LENGTH];
-        char delimiter = '\n';
-        int response_length = ReceiveUntil(response, MAX_RESPONSE_LENGTH, delimiter, timeout);
+        int response_length = ReceiveUntil(response, MAX_RESPONSE_LENGTH, '\n', timeout);
         if (response_length == 0)
         {   
             std::cerr << "Error reading response from ODrive" << std::endl;
@@ -83,7 +82,25 @@ namespace ODrive {
         }
         else
         {
-            return std::string(response);
+            if (!strcmp(response, "unknown command"))
+            {
+                std::cerr << "Unknown command" << std::endl;
+                return "";
+            }
+            else if (!strcmp(response, "invalid property"))
+            {
+                std::cerr << "Invalid property" << std::endl;
+                return "";
+            }
+            else if (!strcmp(response, "invalid command format"))
+            {
+                std::cerr << "Invalid command format" << std::endl;
+                return "";
+            }
+            else
+            {
+                return std::string(response);
+            }
         }
     }
 
@@ -421,7 +438,7 @@ namespace ODrive {
 
     ReturnStatus ODriveSerial::SetAxisParameter(int axis, const std::string& parameter, float value)
     {
-        std::string command = "w " + std::to_string(axis) + " " + parameter + " " + std::to_string(value);
+        std::string command = "w axis" + std::to_string(axis) + "." + parameter + " " + std::to_string(value);
         ReturnStatus status = SendCommand(command);
         if (status == ReturnStatus::OK)
         {
@@ -449,7 +466,7 @@ namespace ODrive {
 
     ReturnStatus ODriveSerial::SetAxisParameter(int axis, const std::string& parameter, int value)
     {
-        std::string command = "w " + std::to_string(axis) + " " + parameter + " " + std::to_string(value);
+        std::string command = "w axis" + std::to_string(axis) + "." + parameter + " " + std::to_string(value);
         ReturnStatus status = SendCommand(command);
         if (status == ReturnStatus::OK)
         {
@@ -477,7 +494,7 @@ namespace ODrive {
 
     float ODriveSerial::GetAxisParameterFloat(int axis, const std::string& parameter)
     {
-        std::string command = "r " + std::to_string(axis) + " " + parameter;
+        std::string command = "r axis" + std::to_string(axis) + "." + parameter;
         return ReadFloat(command);
     }
 
@@ -489,7 +506,7 @@ namespace ODrive {
 
     int ODriveSerial::GetAxisParameterInt(int axis, const std::string& parameter)
     {
-        std::string command = "r " + std::to_string(axis) + " " + parameter;
+        std::string command = "r axis" + std::to_string(axis) + "." + parameter;
         return ReadInt(command);
     }
 
