@@ -110,22 +110,54 @@ namespace ODrive {
 
     int ODriveSerial::ReadInt()
     {
-        return std::stoi(ReadString());
+        try {
+            return std::stoi(ReadString());
+        }
+        catch (std::invalid_argument& e)
+        {
+            std::cerr << "Error reading int from ODrive" << std::endl;
+            return 0;
+        }
     }
 
     int ODriveSerial::ReadInt(const std::string& command)
     {
-        return std::stoi(ReadString(command));
+        try
+        {
+            return std::stoi(ReadString(command));
+        }
+        catch(std::invalid_argument& e)
+        {
+            std::cerr << "Error reading int from ODrive" << std::endl;
+            return 0;
+        }
+        
     }
 
     float ODriveSerial::ReadFloat()
     {
-        return std::stof(ReadString());
+        try
+        {
+            return std::stof(ReadString());
+        }
+        catch(std::invalid_argument& e)
+        {
+            std::cerr << "Error reading float from ODrive" << std::endl;
+            return 0;
+        }
     }
 
     float ODriveSerial::ReadFloat(const std::string& command)
     {
-        return std::stof(ReadString(command));
+        try
+        {
+            return std::stof(ReadString(command));
+        }
+        catch(std::invalid_argument& e)
+        {
+            std::cerr << "Error reading float from ODrive" << std::endl;
+            return 0;
+        }
     }
 
     ReturnStatus ODriveSerial::SetAxisState(int axis, int state, int timeout, bool wait_for_idle) 
