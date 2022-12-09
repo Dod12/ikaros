@@ -37,8 +37,8 @@ TargetArrayControls::Init()
     // user interface while Ikaros is running. If the parameter is not
     // set, the default value specified in the ikc-file will be used instead.
 
-    io(target_array, target_array_size, "TARGET_ARRAY");
-    set_array(target_array, 0, target_array_size);
+    io(pos_target, pos_target_size, "TARGET_ARRAY");
+    set_array(pos_target, 0, pos_target_size);
 }
 
 void
@@ -61,23 +61,23 @@ void TargetArrayControls::Command(std::string s, float x, float y, std::string v
 }
 
 void TargetArrayControls::left() {
-    target_array[0] += -1;
-    target_array[1] += 1;
+    pos_target[0] += -1;
+    pos_target[1] += 1;
 }
 
 void TargetArrayControls::right() {
-    target_array[0] += 1;
-    target_array[1] += -1;
+    pos_target[0] += 1;
+    pos_target[1] += -1;
 }
 
 void TargetArrayControls::backward() {
-    target_array[0] += -1;
-    target_array[1] += -1;
+    pos_target[0] += -1;
+    pos_target[1] += -1;
 }   
 
 void TargetArrayControls::forward() {
-    target_array[0] += 1;
-    target_array[1] += 1;
+    pos_target[0] += 1;
+    pos_target[1] += 1;
 }
 
 // Install the module. This code is executed during start-up.
