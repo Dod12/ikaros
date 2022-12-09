@@ -40,7 +40,7 @@ PathIntegrator::Init()
     Bind(wheelbase, "wheelbase");
     Bind(circumference, "wheel_circumference");
 
-    io(encoder_counts, encoder_counts_size, "ENCODER_COUNTS");
+    io(pos_estim, pos_estim_size, "POS_ESTIM");
     io(vel_estim, vel_estim_size, "VEL_ESTIM");
 
     io(position, position_size, "POSITION");
@@ -48,8 +48,8 @@ PathIntegrator::Init()
     io(heading, heading_size, "HEADING");
     set_array(heading, 0, heading_size);
 
-    prev_values = create_array(encoder_counts_size);
-    set_array(prev_values, 0, encoder_counts_size);
+    prev_values = create_array(pos_estim_size);
+    set_array(prev_values, 0, pos_estim_size);
 
     rotation_centre = create_array(position_size);
 }
@@ -71,8 +71,8 @@ PathIntegrator::Tick()
     float n_r = circumference * (encoder_counts[1] - prev_values[1]) / (float) 8192;
     */
 
-    float n_l = circumference * vel_estim[0] * 1/10;
-    float n_r = circumference * vel_estim[1] * 1/10;
+    float n_l = pos_estim[0];
+    float n_r = pos_estim[1];
 
     if (abs(n_l) < 1e-5 && abs(n_r) < 1e-5) { return; } // Skip updating the path if no movements.
 
@@ -96,8 +96,8 @@ PathIntegrator::Tick()
         heading[0] = remainder(heading[0] + omega_delta_t, 2*M_PI);
     }
     std::cout << "OUTPUT: X: " << position[0] << ", Y: " << position[1] << ", Heading: " << heading[0] << std::endl;
-    prev_values[0] = encoder_counts[0];
-    prev_values[1] = encoder_counts[1];
+    prev_values[0] = pos_estim[0];
+    prev_values[1] = pos_estim[1];
 }
 
 PathIntegrator::~PathIntegrator()
@@ -108,4 +108,4 @@ PathIntegrator::~PathIntegrator()
 
 // Install the module. This code is executed during start-up.
 
-static InitClass init("PathIntegrator", &PathIntegrator::Create, "Source/UserModules/PathIntegrator/");
+static InitClass init("PathIntegrator", &PathIntegrator::Create, "Source/UserModules/EpiMove/PathIntegrator/");

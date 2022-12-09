@@ -2,8 +2,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_subdirectory(ODriveController)
 add_subdirectory(TargetArrayControls)
-#add_subdirectory(PathIntegrator)
-#add_subdirectory(LidarSensor)
+add_subdirectory(PathIntegrator)
+add_subdirectory(LidarSensor)
+add_subdirectory(OccupancyMap)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)

@@ -42,8 +42,8 @@ public:
     float wheelbase, circumference, r, omega;
     int ticks = 0;
 
-    float* encoder_counts;
-    int encoder_counts_size;
+    float* pos_estim;
+    int pos_estim_size;
 
     float* vel_estim;
     int vel_estim_size;

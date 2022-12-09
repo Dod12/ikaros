@@ -106,6 +106,6 @@ LidarSensor::~LidarSensor()
     delete *channel;
 }
 
-static InitClass init("LidarSensor", &LidarSensor::Create, "Source/UserModules/LidarSensor/");
+static InitClass init("LidarSensor", &LidarSensor::Create, "Source/UserModules/EpiMove/LidarSensor/");
 
 

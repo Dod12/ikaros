@@ -110,8 +110,10 @@ OccupancyMap::Tick()
 
         int x_index = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
         int y_index = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
+        int x_index_ego = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x_egocentric / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
+        int y_index_ego = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y_egocentric / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
         occupancy_matrix[x_index][y_index] += l_occupied - l_prior;
-        grid_matrix[x_index][y_index] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
+        grid_matrix[x_index_ego][y_index_ego] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
 
         auto bresenham_cells = interpolate_bresenham(occupancy_matrix_size_x / 2, occupancy_matrix_size_y / 2, x_index, y_index);
 
@@ -128,6 +130,6 @@ OccupancyMap::~OccupancyMap()
     
 }
 
-static InitClass init("OccupancyMap", &OccupancyMap::Create, "Source/UserModules/OccupancyMap/");
+static InitClass init("OccupancyMap", &OccupancyMap::Create, "Source/UserModules/EpiMove/OccupancyMap/");
 
 
