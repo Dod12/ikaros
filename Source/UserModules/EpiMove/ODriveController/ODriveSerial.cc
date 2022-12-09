@@ -223,6 +223,54 @@ namespace ODrive {
         return ReturnStatus::OK;
     }
 
+    ReturnStatus ODriveSerial::CalibrateAxis(int axis)
+    {
+        std::string command = "w axis" + std::to_string(axis) + ".requested_state " + std::to_string(ODrive::AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
+        ReturnStatus status = SendCommand(command);
+        if (status == ReturnStatus::OK)
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            const std::string state_command = "r axis" + std::to_string(axis) + ".current_state";
+            int axis_state = ReadInt(state_command);
+            do 
+            {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                axis_state = ReadInt(state_command);
+            } while (axis_state != ODrive::AXIS_STATE_IDLE);
+            return ReturnStatus::OK;
+        }
+        else
+        {
+            std::cerr << "Error calibrating axis" << std::endl;
+            return ReturnStatus::ERROR;
+        }
+    }
+
+    ReturnStatus ODriveSerial::Calibrate()
+    {
+        for (auto axis : {0, 1})
+        {
+            std::string command = "w axis" + std::to_string(axis) + ".requested_state " + std::to_string(ODrive::AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
+            ReturnStatus status = SendCommand(command);
+            if (status == ReturnStatus::ERROR)
+            {
+                return ReturnStatus::ERROR;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        const std::string state_command_axis0 = "r axis0.current_state";
+        const std::string state_command_axis1 = "r axis1.current_state";
+        int axis0_state = ReadInt(state_command_axis0);
+        int axis1_state = ReadInt(state_command_axis1);
+        do 
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            axis0_state = ReadInt(state_command_axis0);
+            axis1_state = ReadInt(state_command_axis1);
+        } while (axis0_state != ODrive::AXIS_STATE_IDLE && axis1_state != ODrive::AXIS_STATE_IDLE);
+        return ReturnStatus::OK;
+    }
+
     ReturnStatus ODriveSerial::SetAxisPosition(int axis, float position)
     {
         std::string command = "p " + std::to_string(axis) + " " + std::to_string(position);

@@ -85,6 +85,8 @@ namespace ODrive {
 
         ODrive::ReturnStatus SetAxisState(int axis, int state, int timeout = 1000, bool wait_for_idle = false);
         ODrive::ReturnStatus SetState(int state, int timeout = 1000, bool wait_for_idle = false);
+        ODrive::ReturnStatus CalibrateAxis(int axis);
+        ODrive::ReturnStatus Calibrate();
 
         ODrive::ReturnStatus SetAxisPosition(int axis, float position);
         ODrive::ReturnStatus SetAxisPosition(int axis, float position, float velocity);
