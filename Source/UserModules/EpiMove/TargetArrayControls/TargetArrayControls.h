@@ -45,8 +45,10 @@ public:
     // pointers to inputs and outputs
     // and integers to represent their sizes
 
-    float* target_array;
-    int target_array_size;
+    float* pos_target;
+    int pos_target_size;
+
+    float command_distance;
 };
 
 #endif

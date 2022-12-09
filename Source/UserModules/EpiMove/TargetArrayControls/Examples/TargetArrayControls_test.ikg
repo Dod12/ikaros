@@ -13,9 +13,10 @@
 		input_mode  = "3"
 		control_mode  = "3"
 		input_filter_bandwidth = "2"
+		serial_port = "/dev/tty.usbmodem206839A14D4D1"
 	/>
 
-	<connection source="Controls.TARGET_ARRAY" target="Controller.TARGET_ARRAY" />
+	<connection source="Controls.POS_TARGET" target="Controller.POS_TARGET" />
 
 	<view name="ODrive" >
 		<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />
@@ -54,7 +55,7 @@
 	<connection source="LidarSensor.THETA_ARRAY" target="OccupancyMap.THETA_ARRAY" delay="0" />
 	<connection source="Position.POSITION" target="OccupancyMap.POSITION" delay="0" />
 	<connection source="Position.HEADING" target="OccupancyMap.HEADING" delay="0" />
-	<connection source="Controller.ENCODER_COUNTS" target="Position.ENCODER_COUNTS" delay="0" />
+	<connection source="Controller.POS_ESTIM" target="Position.POS_ESTIM" delay="0" />
 	<connection source="Controller.VEL_ESTIM" target="Position.VEL_ESTIM" delay="0" />
 
 	<module class = "Logger" name = "Logger" />
