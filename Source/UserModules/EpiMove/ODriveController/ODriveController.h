@@ -46,6 +46,7 @@ public:
     ODrive::ODriveSerial* odrive;
 
     float gear_reduction, wheel_circumference, speed;
+    float turns_per_meter, meters_per_turn;
 
     int control_mode, input_mode;
     float input_filter_bandwidth, vel_ramp_rate;

@@ -82,17 +82,17 @@ namespace ODrive {
         }
         else
         {
-            if (!strcmp(response, "unknown command"))
+            if (!strcmp(response, "unknown command\r\n"))
             {
                 std::cerr << "Unknown command" << std::endl;
                 return "";
             }
-            else if (!strcmp(response, "invalid property"))
+            else if (!strcmp(response, "invalid property\r\n"))
             {
                 std::cerr << "Invalid property" << std::endl;
                 return "";
             }
-            else if (!strcmp(response, "invalid command format"))
+            else if (!strcmp(response, "invalid command format\r\n"))
             {
                 std::cerr << "Invalid command format" << std::endl;
                 return "";
@@ -179,6 +179,7 @@ namespace ODrive {
 
     ReturnStatus ODriveSerial::SetAxisState(int axis, int state, int timeout, bool wait_for_idle) 
     {
+        const int wait_time = 200;
         std::string command = "w axis" + std::to_string(axis) + ".requested_state " + std::to_string(state);
         ReturnStatus status = SendCommand(command);
         if (status == ReturnStatus::OK)
@@ -189,15 +190,16 @@ namespace ODrive {
                 int counter = 0;
                 do
                 {   
-                    usleep(50);
-                    axis_state = ReadInt("axis" + std::to_string(axis) + ".current_state");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(wait_time));
+                    axis_state = ReadInt("r axis" + std::to_string(axis) + ".current_state");
                     counter++;
-                    if (counter > timeout/50)
+                    if (counter > timeout/wait_time)
                     {
                         std::cerr << "Timeout waiting for axis to go idle" << std::endl;
                         return ReturnStatus::ERROR;
                     }
                 } while (axis_state != ODrive::AXIS_STATE_IDLE);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5*wait_time)); // Add some extra time to make sure the axis is idle
             }
             return ReturnStatus::OK;
         }
@@ -217,25 +219,6 @@ namespace ODrive {
             {
                 return ReturnStatus::ERROR;
             }
-        }
-        if (wait_for_idle)
-        {
-            int axis0_state = 0;
-            int axis1_state = 0;
-            int counter = 0;
-            do
-            {
-                usleep(50);
-                axis0_state = ReadInt("r axis0.current_state"); 
-                axis1_state = ReadInt("r axis1.current_state");
-
-                counter++;
-                if (counter > timeout/50)
-                {
-                    std::cerr << "Timeout waiting for ODrive to go idle" << std::endl;
-                    return ReturnStatus::ERROR;
-                }
-            } while (axis0_state != AXIS_STATE_IDLE && axis1_state != AXIS_STATE_IDLE);
         }
         return ReturnStatus::OK;
     }
