@@ -15,7 +15,7 @@
 			serial_port = "/dev/tty.usbmodem206839A14D4D1"
 		/>
 
-		<connection source="Controls.TARGET_ARRAY" target="Controller.POS_TARGET" />
+		<connection source="Controls.POS_TARGET" target="Controller.POS_TARGET" />
 
 		<view name="ODrive" >
 			<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />
