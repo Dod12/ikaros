@@ -179,7 +179,7 @@ namespace ODrive {
 
     ReturnStatus ODriveSerial::SetAxisState(int axis, int state, int timeout, bool wait_for_idle) 
     {
-        std::string command = "axis" + std::to_string(axis) + ".requested_state = " + std::to_string(state);
+        std::string command = "w axis" + std::to_string(axis) + ".requested_state " + std::to_string(state);
         ReturnStatus status = SendCommand(command);
         if (status == ReturnStatus::OK)
         {
