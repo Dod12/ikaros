@@ -47,7 +47,7 @@ ODriveController::Init()
     Notify(msg_debug, "Wheel circumference: %f, gear reduction: %f", wheel_circumference, gear_reduction);
     Notify(msg_debug, "Max speed: %f", speed);
 
-    turns_per_meter = 1 / (wheel_circumference * gear_reduction);
+    turns_per_meter = gear_reduction / wheel_circumference;
     meters_per_turn = 1 / turns_per_meter;
 
     // Setup serial communication
@@ -85,6 +85,12 @@ ODriveController::Init()
     auto input_modes = odrive->GetParameterInt("controller.config.input_mode");
     
     // Calibrate motors and set to closed loop control
+    if (odrive->Calibrate() != ReturnStatus::OK) {
+        Notify(msg_fatal_error, "Failed to calibrate motors");
+    }
+    if (odrive->SetState(AXIS_STATE_CLOSED_LOOP_CONTROL) != ReturnStatus::OK) {
+        Notify(msg_fatal_error, "Failed to set motors to closed loop control");
+    }
     /*
     if (odrive->SetState(AXIS_STATE_FULL_CALIBRATION_SEQUENCE, 10000, true) != ReturnStatus::OK) {
         Notify(msg_fatal_error, "Failed to calibrate motors");
@@ -128,7 +134,7 @@ ODriveController::Tick()
     {
         // We need to invert the left desired pos, since the axes are mirrored
         Notify(msg_debug, "Setting position to %f, %f", -target_pos_array[0] * turns_per_meter, target_pos_array[1] * turns_per_meter);
-        odrive->SetPosition({-target_pos_array[0] * turns_per_meter, target_pos_array[1] * turns_per_meter});
+        odrive->SetPosition({-target_pos_array[0] * turns_per_meter, target_pos_array[1] * turns_per_meter}); // TODO: Set speed based on confidence in the trajectory and the distance to the target
     } 
     else if (control_mode == ControlMode::CONTROL_MODE_VELOCITY_CONTROL) 
     {
