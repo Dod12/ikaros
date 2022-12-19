@@ -26,6 +26,7 @@
 			<button height = "25" width = "100" y = "10" x = "230" label="Forward Right" title="Forward Right" command="Controls.forward_right" />
 			<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
 			<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
+			<slider-horizontal  height = "100" width = "100" y = "40" x = "200" count = "3" parameter = "Controller.start_speed" label = "X" title = "Speed (m/s)" select = "0.1" labels = "" min = "0" max = "0.5" step = "0.01"/>
 		</view>
 </group>
  

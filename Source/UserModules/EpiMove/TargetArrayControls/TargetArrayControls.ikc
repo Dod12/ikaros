@@ -10,11 +10,11 @@
 		<module
 			class="TargetArrayControls"
 			name="TargetArrayControls"
-			command_distance="0.25"
+			command_distance="0.10"
 		/>
 	</example>
 
-	<parameter name="command_distance" type="float" default="0.25" description="Distance to move when pressing a button in cm" />
+	<parameter name="command_distance" type="float" default="0.10" description="Distance to move when pressing a button in cm" />
 
 	<output name="POS_TARGET" description="Left and right axis targets" size="2" />
 
