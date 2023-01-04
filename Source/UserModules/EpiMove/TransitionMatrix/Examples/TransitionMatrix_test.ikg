@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<group title="TransitionMatrix Example">
+<group title="Transition Matrix Example">
 	
 	<module
 		class = "TransitionMatrix"
