@@ -6,6 +6,7 @@ add_subdirectory(PathIntegrator)
 add_subdirectory(LidarSensor)
 add_subdirectory(OccupancyMap)
 add_subdirectory(TransitionMatrix)
+add_subdirectory(SuccessorRepresentation)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)
