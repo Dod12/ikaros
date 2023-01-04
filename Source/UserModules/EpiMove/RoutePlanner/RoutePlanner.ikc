@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<class name="RoutePlanner" description="Create transition matrix from grid.">
+
+	<description type="text">
+		Plan route from the centre of the grid to the maximum.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="RoutePlanner"
+			name="RoutePlanner"
+		/>
+	</example>
+
+	<parameter name="start_position" description="Start position of the route" type="array" size="2" default="0.0 0.0" />
+
+	<input name="SR_GRADIENT" description="Gradient of the successor representation at a given location in the grid" />
+	<input name="TARGET_POSITION" description="Position of navigation target" size="2" />
+
+	<output name="ROUTE" description="Route from the centre of the grid to the maximum" />
+
+	<link class="RoutePlanner" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>RoutePlanner.h</file>
+   		<file>RoutePlanner.cc</file>
+   		<file>RoutePlanner.ikc</file>
+   </files>
+
+</class>

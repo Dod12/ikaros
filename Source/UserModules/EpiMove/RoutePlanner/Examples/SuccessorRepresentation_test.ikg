@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<group title="Successor Representation Example">
+	
+	<module
+		class = "Constant"
+		name = "Grid"
+        outputsize_x = "9"
+        outputsize_y = "9"
+		_x = "25"
+		_y = "25"
+        data = "
+			1	1	1	1	1	1	1	1	1
+            1	0	0	0	1	0	0	0	1
+            1	0	0	0	0	0	0	0	1
+            1	0	0	0	1	0	0	0	1
+            1	1	0	1	1	1	1	1	1
+            1	0	0	0	1	0	0	0	1
+            1	0	0	0	0	0	0	0	1
+            1	0	0	0	1	0	0	0	1
+            1	1	1	1	1	1	1	1	1"
+	/>
+
+	<module class = "TransitionMatrix" name = "Transition" _x = "175" _y = "25"/>
+	<module class = "SuccessorRepresentation" name = "Successor" _x = "325" _y = "25"/>
+	<module class = "SRGradient" name = "Gradient" _x = "475" _y = "25"/>
+
+	<connection  source = "Grid.OUTPUT"  target = "Transition.OBSTACLE_GRID" delay="0" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "Successor.TRANSITION_MATRIX" delay="0" />
+	<connection  source = "Successor.SUCCESSOR_REPRESENTATION"  target = "Gradient.SUCCESSOR_REPRESENTATION" delay="0" />
+
+	<view  name = "TransitionMatrix">
+		<slider-horizontal title="Gamma" show_title="true" x="10" y="810" width="390" height="50" step="0.01" min="0.85" max="1" value="0.95" parameter="Successor.gamma" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Gridmap" direction = "horizontal" source = "Grid.OUTPUT" x = "10" y = "10" valueLow="0" valueHigh="1" command="Gradient.set_position"/>
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "Successor.SUCCESSOR_REPRESENTATION" x = "810" y = "10" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "Gradient.SR_GRADIENT" x = "10" y = "410" />
+	</view>
+
+</group>
+ 
