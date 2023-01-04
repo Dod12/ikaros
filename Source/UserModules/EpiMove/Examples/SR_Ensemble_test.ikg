@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+
+<group title="Successor Representation Example">
+	
+	<module
+		class = "Constant"
+		name = "Grid"
+		_x="25"
+		_y="425"
+        outputsize_x = "9"
+        outputsize_y = "9"
+        data = "
+			1	1	1	1	1	1	1	1	1
+            1	0	0	0	1	0	0	0	1
+            1	0	0	0	0	0	0	0	1
+            1	0	0	0	1	0	0	0	1
+            1	1	0	1	1	1	1	1	1
+            1	0	0	0	1	0	0	0	1
+            1	0	0	0	0	0	0	0	1
+            1	0	0	0	1	0	0	0	1
+            1	1	1	1	1	1	1	1	1"
+	/>
+
+	<module class = "TransitionMatrix" name = "Transition" _x = "150" _y = "425" />
+
+	<module class="SuccessorRepresentation" name="SR95" gamma="0.95" _x="325" _y="25" />
+	<module class="SuccessorRepresentation" name="SR90" gamma="0.90" _x="325" _y="105" />
+	<module class="SuccessorRepresentation" name="SR85" gamma="0.85" _x="325" _y="185" />
+	<module class="SuccessorRepresentation" name="SR80" gamma="0.80" _x="325" _y="265" />
+	<module class="SuccessorRepresentation" name="SR75" gamma="0.75" _x="325" _y="345" />
+	<module class="SuccessorRepresentation" name="SR70" gamma="0.70" _x="325" _y="425" />
+	<module class="SuccessorRepresentation" name="SR65" gamma="0.65" _x="325" _y="505" />
+	<module class="SuccessorRepresentation" name="SR60" gamma="0.60" _x="325" _y="585" />
+	<module class="SuccessorRepresentation" name="SR55" gamma="0.55" _x="325" _y="665" />
+	<module class="SuccessorRepresentation" name="SR50" gamma="0.50" _x="325" _y="745" />
+	<module class="SuccessorRepresentation" name="SR45" gamma="0.45" _x="325" _y="825" />
+
+	<module class="SRReduction" name="SRMean" _x="500" _y="425" />
+
+	<module class="SRGradient" name="SRGradient" _x="675" _y="425" />
+
+	<connection  source = "Grid.OUTPUT"  target = "Transition.OBSTACLE_GRID" delay="0" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR95.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR90.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR85.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR80.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR75.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR70.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR65.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR60.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR55.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR50.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR45.TRANSITION_MATRIX" delay="1" />
+
+	<connection  source = "SR95.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR1" delay="1" />
+	<connection  source = "SR90.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR2" delay="1" />
+	<connection  source = "SR85.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR3" delay="1" />
+	<connection  source = "SR80.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR4" delay="1" />
+	<connection  source = "SR75.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR5" delay="1" />
+	<connection  source = "SR70.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR6" delay="1" />
+	<connection  source = "SR65.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR7" delay="1" />
+	<connection  source = "SR60.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR8" delay="1" />
+	<connection  source = "SR55.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR9" delay="1" />
+	<connection  source = "SR50.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR10" delay="1" />
+	<connection  source = "SR45.SUCCESSOR_REPRESENTATION"  target = "SRMean.SR11" delay="1" />
+
+	<connection  source = "SRMean.MEAN_SR"  target = "SRGradient.SUCCESSOR_REPRESENTATION" delay="0" />
+
+	<view  name = "TransitionMatrix">
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Gridmap" direction = "horizontal" source = "Grid.OUTPUT" x = "10" y = "10" valueLow="0" valueHigh="1" command="SRGradient.set_position"/>
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "Successor.SUCCESSOR_REPRESENTATION" x = "810" y = "10" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "10" y = "410" />
+	</view>
+
+</group>
+ 
