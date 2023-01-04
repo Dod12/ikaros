@@ -48,7 +48,7 @@ TransitionMatrix::Tick()
     set_matrix(transition_matrix, 0, transition_matrix_size_x, transition_matrix_size_y);
 
     // Direction directions[] = {NONE, NORTH_EAST, NORTH, NORTH_WEST, EAST, WEST, SOUTH_EAST, SOUTH, SOUTH_WEST};
-    Direction directions[] = {NORTH, EAST, SOUTH, WEST};
+    Direction directions[] = {NONE, NORTH, EAST, SOUTH, WEST};
 
     for (int i = 0; i < grid_matrix_size_x; ++i) {
         for (int j = 0; j < grid_matrix_size_y; ++j) {
