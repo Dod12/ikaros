@@ -50,10 +50,12 @@ public:
 
     // Output arrays
 
-    std::pair<int, int> sr_gradient_position = {0, 0};
     float ** sr_gradient;
     int sr_gradient_size_x;
     int sr_gradient_size_y;
+
+    float * target_position;
+    int target_position_size_x;
 };
 
 #endif

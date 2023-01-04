@@ -30,6 +30,7 @@ void SRGradient::SetSizes()
     int sizex = GetInputSizeX("SUCCESSOR_REPRESENTATION");
     int sizey = GetInputSizeY("SUCCESSOR_REPRESENTATION");
     SetOutputSize("SR_GRADIENT", sqrt(sizex), sqrt(sizey));
+    SetOutputSize("TARGET_POSITION", 2);
 }
 
 void
@@ -40,6 +41,11 @@ SRGradient::Init()
 
     // Set output matrix
     io(sr_gradient, sr_gradient_size_x, sr_gradient_size_y, "SR_GRADIENT");
+    io(target_position, target_position_size_x, "TARGET_POSITION");
+
+    // Set default target position
+    target_position[0] = sr_gradient_size_x / 2;
+    target_position[1] = sr_gradient_size_y / 2;
 }
 
 void
@@ -48,7 +54,7 @@ SRGradient::Tick()
     // Calculate gradient of successor representation
     for (int i = 0; i < sr_gradient_size_x; ++i) {
         for (int j = 0; j < sr_gradient_size_y; ++j) {
-            sr_gradient[i][j] = successor_representation[i * sr_gradient_size_x + j][sr_gradient_position.second * sr_gradient_size_x + sr_gradient_position.first];
+            sr_gradient[i][j] = successor_representation[i * sr_gradient_size_x + j][(int) (target_position[1] * sr_gradient_size_x + target_position[0])];
         }
     }
 }
@@ -56,7 +62,8 @@ SRGradient::Tick()
 void SRGradient::Command(std::string s, float x, float y, std::string value)
 {
     if (s == "set_position") {
-        sr_gradient_position = std::make_pair(x, y);
+        target_position[0] = x;
+        target_position[1] = y;
     }
 }
 

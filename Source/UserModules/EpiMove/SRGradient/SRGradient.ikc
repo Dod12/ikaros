@@ -15,6 +15,7 @@
 
 	<input name="SUCCESSOR_REPRESENTATION" description="Successor representation for the obstacle grid" />
 	<output name="SR_GRADIENT" description="Gradient of the successor representation at a given location in the grid" />
+	<output name="TARGET_POSITION" description="Position of the maximum in the gradient" size="2" />
 
 	<link class="SRGradient" />
 
