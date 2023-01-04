@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<class name="SRGradient" description="Create transition matrix from grid.">
+
+	<description type="text">
+		Module for creating transition matrix from observed gridmap.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="SRGradient"
+			name="SRGradient"
+		/>
+	</example>
+
+	<input name="SUCCESSOR_REPRESENTATION" description="Successor representation for the obstacle grid" />
+	<output name="SR_GRADIENT" description="Gradient of the successor representation at a given location in the grid" />
+
+	<link class="SRGradient" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>SRGradient.h</file>
+   		<file>SRGradient.cc</file>
+   		<file>SRGradient.ikc</file>
+   </files>
+
+</class>

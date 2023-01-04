@@ -7,6 +7,7 @@ add_subdirectory(LidarSensor)
 add_subdirectory(OccupancyMap)
 add_subdirectory(TransitionMatrix)
 add_subdirectory(SuccessorRepresentation)
+add_subdirectory(SRGradient)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)
