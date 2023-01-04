@@ -37,9 +37,9 @@
 	</author>
 
    <files>
-   		<file>MinimalModule.h</file>
-   		<file>MinimalModule.cc</file>
-   		<file>MinimalModule.ikc</file>
+   		<file>SRReduction.h</file>
+   		<file>SRReduction.cc</file>
+   		<file>SRReduction.ikc</file>
    </files>
 
 </class>
