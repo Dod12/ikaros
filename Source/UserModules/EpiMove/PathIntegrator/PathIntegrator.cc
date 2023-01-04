@@ -1,5 +1,5 @@
 //
-//	ODriveController.cc		This file is a part of the IKAROS project
+//	PathIntegrator.cc		This file is a part of the IKAROS project
 //
 //    Copyright (C) 2022 Daniel Calström Schad
 //

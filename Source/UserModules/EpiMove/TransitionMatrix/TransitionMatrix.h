@@ -34,8 +34,13 @@ public:
     TransitionMatrix(Parameter * p) : Module(p) {}
     ~TransitionMatrix();
 
+    void        SetSizes();
     void 		Init();
     void 		Tick();
+    void        Command(std::string s, float x, float y, std::string value);
+
+    // Gamma discount factor
+    float gamma = 0.95;
 
     // Input arrays
 
@@ -48,6 +53,19 @@ public:
     float ** transition_matrix;
     int transition_matrix_size_x;
     int transition_matrix_size_y;
+
+    float ** sucessor_representation;
+    int sucessor_representation_size_x;
+    int sucessor_representation_size_y;
+
+    std::pair<int, int> reward_position = {0, 0};
+    float ** reward_gradient;
+    int reward_gradient_size_x;
+    int reward_gradient_size_y;
+
+    // Helper array
+    float ** identity;
+    float ** intermediate;
 
 private:
 
@@ -63,7 +81,7 @@ private:
         NONE = -1
     };
 
-    float get_grid_neighbour(int row, int col, Direction direction);
+    float get_grid_neighbour(int row, int col, Direction direction = NONE);
     int get_node_number(int row, int col, Direction direction = NONE);
     bool is_valid_node(int row, int col, Direction direction = NONE);
 

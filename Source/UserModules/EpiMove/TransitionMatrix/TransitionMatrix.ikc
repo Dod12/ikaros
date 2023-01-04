@@ -13,8 +13,12 @@
 		/>
 	</example>
 
-	<input name="OBSTACLE_GRID" description="Matrix of positions of objects detected by the lidar sensor" size_x="128" size_y="128" />
-	<output name="TRANSITION_MATRIX" description="Transition matrix for the obstacle grid" size_x="16384" size_y="16384" />
+	<parameter name="gamma" description="Discount factor" default="0.975" />
+
+	<input name="OBSTACLE_GRID" description="Matrix of positions of objects detected by the lidar sensor"/>
+	<output name="TRANSITION_MATRIX" description="Transition matrix for the obstacle grid" />
+	<output name="SUCESSOR_REPRESENTATION" description="Sucessor representation for the obstacle grid" />
+	<output name="REWARD_GRADIENT" description="Reward gradient for the obstacle grid" size_set="OBSTACLE_GRID"/>
 
 	<link class="TransitionMatrix" />
 

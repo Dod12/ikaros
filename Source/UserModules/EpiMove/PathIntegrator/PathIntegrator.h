@@ -1,5 +1,5 @@
 //
-//	MyModule.h		This file is a part of the IKAROS project
+//	PathIntegrator.h		This file is a part of the IKAROS project
 //
 //    Copyright (C) 2012 <Author Name>
 //

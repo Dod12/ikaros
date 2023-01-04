@@ -24,35 +24,73 @@
 
 using namespace ikaros;
 
+void TransitionMatrix::SetSizes()
+{
+    // Set output matrix sizes
+    int sizex = GetInputSizeX("OBSTACLE_GRID");
+    int sizey = GetInputSizeY("OBSTACLE_GRID");
+    SetOutputSize("TRANSITION_MATRIX", sizex * sizey, sizex * sizey);
+    SetOutputSize("SUCESSOR_REPRESENTATION", sizex * sizey, sizex * sizey);
+    SetOutputSize("REWARD_GRADIENT", sizex, sizey);
+}
+
 void
 TransitionMatrix::Init()
 {
 
+    // Set parameters
+    Bind(gamma, "gamma");
+
     // Get input arrays
     io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "OBSTACLE_GRID");
-    grid_matrix = {}; // Init matrix to 0
 
     // Set output matrix
     io(transition_matrix, transition_matrix_size_x, transition_matrix_size_y, "TRANSITION_MATRIX");
+    io(sucessor_representation, sucessor_representation_size_x, sucessor_representation_size_y, "SUCESSOR_REPRESENTATION");
+    io(reward_gradient, reward_gradient_size_x, reward_gradient_size_y, "REWARD_GRADIENT");
+
+    identity = create_matrix(transition_matrix_size_x, transition_matrix_size_y);
+    identity = eye(identity, transition_matrix_size_x);
+
+    intermediate = create_matrix(transition_matrix_size_x, transition_matrix_size_y);
 }
 
 void
 TransitionMatrix::Tick()
 {
-    Direction directions[] = {NORTH_EAST, NORTH, NORTH_WEST, EAST, WEST, SOUTH_EAST, SOUTH, SOUTH_WEST};
+    set_matrix(transition_matrix, 0, transition_matrix_size_x, transition_matrix_size_y);
+
+    // Direction directions[] = {NONE, NORTH_EAST, NORTH, NORTH_WEST, EAST, WEST, SOUTH_EAST, SOUTH, SOUTH_WEST};
+    Direction directions[] = {NORTH, EAST, SOUTH, WEST};
+
     for (int i = 0; i < grid_matrix_size_x; ++i) {
         for (int j = 0; j < grid_matrix_size_y; ++j) {
-            int sum = 0;
+            float sum = 1e-6;
             for (auto direction : directions) {
                 if (is_valid_node(i, j, direction)) {
                     sum += get_grid_neighbour(i, j, direction);
                 }
             }
+
             for (auto direction : directions) {
                 if (is_valid_node(i, j, direction)) {
-                    transition_matrix[get_node_number(i, j)][get_node_number(i, j, direction)] = get_grid_neighbour(i, j, direction) / sum;
+                    transition_matrix[get_node_number(i, j, direction)][get_node_number(i, j)] = get_grid_neighbour(i, j, direction) / sum;
                 }
             }
+        }
+    }
+
+    // Calculate sucessor representation = 1/(I - gamma * T)
+    multiply(intermediate, transition_matrix, gamma, transition_matrix_size_x, transition_matrix_size_y);
+
+    subtract(intermediate, identity, intermediate, transition_matrix_size_x, transition_matrix_size_y);
+
+    pinv(sucessor_representation, intermediate, transition_matrix_size_x, transition_matrix_size_y);
+
+    // Calculate reward gradient
+    for (int i = 0; i < reward_gradient_size_x; ++i) {
+        for (int j = 0; j < reward_gradient_size_y; ++j) {
+            reward_gradient[i][j] = sucessor_representation[i * reward_gradient_size_x + j][reward_position.second * reward_gradient_size_x + reward_position.first];
         }
     }
 }
@@ -76,7 +114,7 @@ float TransitionMatrix::get_grid_neighbour(int row, int col, TransitionMatrix::D
         case TransitionMatrix::Direction::NORTH_WEST:
             return grid_matrix[row - 1][col - 1];
         default:
-            return -1;
+            return grid_matrix[row][col];
     }
 }
 
@@ -126,11 +164,18 @@ bool TransitionMatrix::is_valid_node(int row, int col, TransitionMatrix::Directi
     }
 }
 
-TransitionMatrix::~TransitionMatrix()
-{
-    
+void TransitionMatrix::Command(std::string s, float x, float y, std::string value){
+    if (s == "set_position") {
+        reward_position = std::make_pair(x, y);
+    }
 }
 
-static InitClass init("TransitionMatrix", &TransitionMatrix::Create, "Source/UserModules/TransitionMatrix/");
+TransitionMatrix::~TransitionMatrix()
+{
+    destroy_matrix(identity);
+    destroy_matrix(intermediate);
+}
+
+static InitClass init("TransitionMatrix", &TransitionMatrix::Create, "Source/UserModules/EpiMove/TransitionMatrix/");
 
 
