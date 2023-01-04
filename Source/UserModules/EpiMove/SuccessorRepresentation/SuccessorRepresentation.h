@@ -1,5 +1,5 @@
 //
-//	TransitionMatrix.h		This file is a part of the IKAROS project
+//	SuccessorRepresentation.h		This file is a part of the IKAROS project
 // 						
 //    Copyright (C) 2023 Daniel Carlström Schad
 //
@@ -21,52 +21,41 @@
 //
 
 
-#ifndef TransitionMatrix_
-#define TransitionMatrix_
+#ifndef SuccessorRepresentation_
+#define SuccessorRepresentation_
 
 #include "IKAROS.h"
 
-class TransitionMatrix: public Module
+class SuccessorRepresentation: public Module
 {
 public:
-    static Module * Create(Parameter * p) { return new TransitionMatrix(p); }
+    static Module * Create(Parameter * p) { return new SuccessorRepresentation(p); }
 
-    TransitionMatrix(Parameter * p) : Module(p) {}
-    ~TransitionMatrix();
+    SuccessorRepresentation(Parameter * p) : Module(p) {}
+    ~SuccessorRepresentation();
 
     void        SetSizes();
     void 		Init();
     void 		Tick();
 
+    // Gamma discount factor
+    float gamma = 0.95;
+
     // Input arrays
-
-    float ** grid_matrix;
-    int grid_matrix_size_x;
-    int grid_matrix_size_y;
-
-    // Output arrays
 
     float ** transition_matrix;
     int transition_matrix_size_x;
     int transition_matrix_size_y;
 
-private:
+    // Output arrays
 
-    enum Direction {
-        NORTH_EAST = 1,
-        NORTH = 2,
-        NORTH_WEST = 3,
-        EAST = 4,
-        WEST = 5,
-        SOUTH_EAST = 6,
-        SOUTH = 7,
-        SOUTH_WEST = 8,
-        NONE = -1
-    };
+    float ** sucessor_representation;
+    int sucessor_representation_size_x;
+    int sucessor_representation_size_y;
 
-    float get_grid_neighbour(int row, int col, Direction direction = NONE);
-    int get_node_number(int row, int col, Direction direction = NONE);
-    bool is_valid_node(int row, int col, Direction direction = NONE);
+    // Helper array
+    float ** identity;
+    float ** intermediate;
 
 };
 

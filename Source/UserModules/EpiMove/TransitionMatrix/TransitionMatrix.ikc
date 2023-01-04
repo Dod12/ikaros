@@ -3,7 +3,7 @@
 <class name="TransitionMatrix" description="Create transition matrix from grid.">
 
 	<description type="text">
-		Module for interacting with the RPLIDAR-A3 sensor.
+		Module for creating transition matrix from observed gridmap.
 	</description>
 
 	<example description="A simple example">
@@ -13,12 +13,8 @@
 		/>
 	</example>
 
-	<parameter name="gamma" description="Discount factor" default="0.975" />
-
 	<input name="OBSTACLE_GRID" description="Matrix of positions of objects detected by the lidar sensor"/>
 	<output name="TRANSITION_MATRIX" description="Transition matrix for the obstacle grid" />
-	<output name="SUCESSOR_REPRESENTATION" description="Sucessor representation for the obstacle grid" />
-	<output name="REWARD_GRADIENT" description="Reward gradient for the obstacle grid" size_set="OBSTACLE_GRID"/>
 
 	<link class="TransitionMatrix" />
 

@@ -30,29 +30,16 @@ void TransitionMatrix::SetSizes()
     int sizex = GetInputSizeX("OBSTACLE_GRID");
     int sizey = GetInputSizeY("OBSTACLE_GRID");
     SetOutputSize("TRANSITION_MATRIX", sizex * sizey, sizex * sizey);
-    SetOutputSize("SUCESSOR_REPRESENTATION", sizex * sizey, sizex * sizey);
-    SetOutputSize("REWARD_GRADIENT", sizex, sizey);
 }
 
 void
 TransitionMatrix::Init()
 {
-
-    // Set parameters
-    Bind(gamma, "gamma");
-
     // Get input arrays
     io(grid_matrix, grid_matrix_size_x, grid_matrix_size_y, "OBSTACLE_GRID");
 
     // Set output matrix
     io(transition_matrix, transition_matrix_size_x, transition_matrix_size_y, "TRANSITION_MATRIX");
-    io(sucessor_representation, sucessor_representation_size_x, sucessor_representation_size_y, "SUCESSOR_REPRESENTATION");
-    io(reward_gradient, reward_gradient_size_x, reward_gradient_size_y, "REWARD_GRADIENT");
-
-    identity = create_matrix(transition_matrix_size_x, transition_matrix_size_y);
-    identity = eye(identity, transition_matrix_size_x);
-
-    intermediate = create_matrix(transition_matrix_size_x, transition_matrix_size_y);
 }
 
 void
@@ -77,20 +64,6 @@ TransitionMatrix::Tick()
                     transition_matrix[get_node_number(i, j, direction)][get_node_number(i, j)] = get_grid_neighbour(i, j, direction) / sum;
                 }
             }
-        }
-    }
-
-    // Calculate sucessor representation = 1/(I - gamma * T)
-    multiply(intermediate, transition_matrix, gamma, transition_matrix_size_x, transition_matrix_size_y);
-
-    subtract(intermediate, identity, intermediate, transition_matrix_size_x, transition_matrix_size_y);
-
-    pinv(sucessor_representation, intermediate, transition_matrix_size_x, transition_matrix_size_y);
-
-    // Calculate reward gradient
-    for (int i = 0; i < reward_gradient_size_x; ++i) {
-        for (int j = 0; j < reward_gradient_size_y; ++j) {
-            reward_gradient[i][j] = sucessor_representation[i * reward_gradient_size_x + j][reward_position.second * reward_gradient_size_x + reward_position.first];
         }
     }
 }
@@ -164,16 +137,8 @@ bool TransitionMatrix::is_valid_node(int row, int col, TransitionMatrix::Directi
     }
 }
 
-void TransitionMatrix::Command(std::string s, float x, float y, std::string value){
-    if (s == "set_position") {
-        reward_position = std::make_pair(x, y);
-    }
-}
-
 TransitionMatrix::~TransitionMatrix()
 {
-    destroy_matrix(identity);
-    destroy_matrix(intermediate);
 }
 
 static InitClass init("TransitionMatrix", &TransitionMatrix::Create, "Source/UserModules/EpiMove/TransitionMatrix/");
