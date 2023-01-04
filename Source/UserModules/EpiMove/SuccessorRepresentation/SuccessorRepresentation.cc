@@ -30,6 +30,7 @@ void SuccessorRepresentation::SetSizes()
     int sizex = GetInputSizeX("TRANSITION_MATRIX");
     int sizey = GetInputSizeY("TRANSITION_MATRIX");
     SetOutputSize("SUCCESSOR_REPRESENTATION", sizex, sizey);
+    SetOutputSize("SR_GRADIENT", (int) sqrt(sizex), (int) sqrt(sizey));
 }
 
 void
@@ -43,7 +44,8 @@ SuccessorRepresentation::Init()
     io(transition_matrix, transition_matrix_size_x, transition_matrix_size_y, "TRANSITION_MATRIX");
 
     // Set output matrix
-    io(sucessor_representation, sucessor_representation_size_x, sucessor_representation_size_y, "SUCCESSOR_REPRESENTATION");
+    io(successor_representation, successor_representation_size_x, successor_representation_size_y, "SUCCESSOR_REPRESENTATION");
+    io(sr_gradient, sr_gradient_size_x, sr_gradient_size_y, "SR_GRADIENT");
 
     identity = create_matrix(transition_matrix_size_x, transition_matrix_size_y);
     identity = eye(identity, transition_matrix_size_x);
@@ -54,12 +56,18 @@ SuccessorRepresentation::Init()
 void
 SuccessorRepresentation::Tick()
 {
-    // Calculate sucessor representation = 1/(I - gamma * T)
+    // Calculate successor representation = 1/(I - gamma * T)
     multiply(intermediate, transition_matrix, gamma, transition_matrix_size_x, transition_matrix_size_y);
 
     subtract(intermediate, identity, intermediate, transition_matrix_size_x, transition_matrix_size_y);
 
-    pinv(sucessor_representation, intermediate, transition_matrix_size_x, transition_matrix_size_y);
+    pinv(successor_representation, intermediate, transition_matrix_size_x, transition_matrix_size_y);
+}
+
+void SuccessorRepresentation::Command(std::string s, float x, float y, std::string value){
+    if (s == "set_position") {
+        sr_gradient_position = std::make_pair(x, y);
+    }
 }
 
 SuccessorRepresentation::~SuccessorRepresentation()

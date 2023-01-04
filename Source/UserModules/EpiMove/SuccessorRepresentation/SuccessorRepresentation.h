@@ -37,6 +37,7 @@ public:
     void        SetSizes();
     void 		Init();
     void 		Tick();
+    void        Command(std::string s, float x, float y, std::string value);
 
     // Gamma discount factor
     float gamma = 0.95;
@@ -49,9 +50,14 @@ public:
 
     // Output arrays
 
-    float ** sucessor_representation;
-    int sucessor_representation_size_x;
-    int sucessor_representation_size_y;
+    float ** successor_representation;
+    int successor_representation_size_x;
+    int successor_representation_size_y;
+
+    std::pair<int, int> sr_gradient_position = {0, 0};
+    float ** sr_gradient;
+    int sr_gradient_size_x;
+    int sr_gradient_size_y;
 
     // Helper array
     float ** identity;
