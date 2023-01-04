@@ -10,7 +10,7 @@
         outputsize_x = "9"
         outputsize_y = "9"
         data = "
-			1	1	1	1	1	1	1	1	1
+            1	1	1	1	1	1	1	1	1
             1	0	0	0	1	0	0	0	1
             1	0	0	0	0	0	0	0	1
             1	0	0	0	1	0	0	0	1
@@ -21,25 +21,30 @@
             1	1	1	1	1	1	1	1	1"
 	/>
 
+	<module class="MazeGenerator" name="Maze" width="9" height="9" _x="25" _y="425" />
+
 	<module class = "TransitionMatrix" name = "Transition" _x = "150" _y = "425" />
 
-	<module class="SuccessorRepresentation" name="SR95" gamma="0.95" _x="325" _y="25" />
-	<module class="SuccessorRepresentation" name="SR90" gamma="0.90" _x="325" _y="105" />
-	<module class="SuccessorRepresentation" name="SR85" gamma="0.85" _x="325" _y="185" />
-	<module class="SuccessorRepresentation" name="SR80" gamma="0.80" _x="325" _y="265" />
-	<module class="SuccessorRepresentation" name="SR75" gamma="0.75" _x="325" _y="345" />
-	<module class="SuccessorRepresentation" name="SR70" gamma="0.70" _x="325" _y="425" />
-	<module class="SuccessorRepresentation" name="SR65" gamma="0.65" _x="325" _y="505" />
-	<module class="SuccessorRepresentation" name="SR60" gamma="0.60" _x="325" _y="585" />
-	<module class="SuccessorRepresentation" name="SR55" gamma="0.55" _x="325" _y="665" />
-	<module class="SuccessorRepresentation" name="SR50" gamma="0.50" _x="325" _y="745" />
-	<module class="SuccessorRepresentation" name="SR45" gamma="0.45" _x="325" _y="825" />
+	<module class="SuccessorRepresentation" name="SR95" gamma="0.99" _x="325" _y="25"  />
+	<module class="SuccessorRepresentation" name="SR90" gamma="0.95" _x="325" _y="105" />
+	<module class="SuccessorRepresentation" name="SR85" gamma="0.90" _x="325" _y="185" />
+	<module class="SuccessorRepresentation" name="SR80" gamma="0.85" _x="325" _y="265" />
+	<module class="SuccessorRepresentation" name="SR75" gamma="0.80" _x="325" _y="345" />
+	<module class="SuccessorRepresentation" name="SR70" gamma="0.75" _x="325" _y="425" />
+	<module class="SuccessorRepresentation" name="SR65" gamma="0.70" _x="325" _y="505" />
+	<module class="SuccessorRepresentation" name="SR60" gamma="0.65" _x="325" _y="585" />
+	<module class="SuccessorRepresentation" name="SR55" gamma="0.60" _x="325" _y="665" />
+	<module class="SuccessorRepresentation" name="SR50" gamma="0.55" _x="325" _y="745" />
+	<module class="SuccessorRepresentation" name="SR45" gamma="0.50" _x="325" _y="825" />
 
 	<module class="SRReduction" name="SRMean" _x="500" _y="425" />
 
 	<module class="SRGradient" name="SRGradient" _x="675" _y="425" />
 
-	<connection  source = "Grid.OUTPUT"  target = "Transition.OBSTACLE_GRID" delay="0" />
+	<module class="RoutePlanner" name="RoutePlanner" _x="850" _y="425" />
+
+	<connection  source = "Maze.OUTPUT"  target = "Transition.OBSTACLE_GRID" delay="0" />
+
 	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR95.TRANSITION_MATRIX" delay="1" />
 	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR90.TRANSITION_MATRIX" delay="1" />
 	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR85.TRANSITION_MATRIX" delay="1" />
@@ -66,11 +71,15 @@
 
 	<connection  source = "SRMean.MEAN_SR"  target = "SRGradient.SUCCESSOR_REPRESENTATION" delay="0" />
 
+	<connection  source = "SRGradient.TARGET_POSITION"  target = "RoutePlanner.TARGET_POSITION" delay="0" />
+	<connection  source = "SRGradient.SR_GRADIENT"  target = "RoutePlanner.SR_GRADIENT" delay="0" />
+
 	<view  name = "TransitionMatrix">
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Gridmap" direction = "horizontal" source = "Grid.OUTPUT" x = "10" y = "10" valueLow="0" valueHigh="1" command="SRGradient.set_position"/>
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "Successor.SUCCESSOR_REPRESENTATION" x = "810" y = "10" />
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "10" y = "410" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Gridmap" direction = "horizontal" source = "Maze.OUTPUT" x = "10" y = "10" valueLow="0" valueHigh="1" command="RoutePlanner.set_position" />
+		<!--<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "SRMean.MEAN_SR" x = "810" y = "10" />-->
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "10" y = "410" command="SRGradient.set_position" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Route Planner" direction = "horizontal" source = "RoutePlanner.ROUTE" x = "410" y = "410" />
 	</view>
 
 </group>
