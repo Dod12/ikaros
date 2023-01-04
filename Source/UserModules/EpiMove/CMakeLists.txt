@@ -8,6 +8,7 @@ add_subdirectory(OccupancyMap)
 add_subdirectory(TransitionMatrix)
 add_subdirectory(SuccessorRepresentation)
 add_subdirectory(SRGradient)
+add_subdirectory(SRReduction)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)

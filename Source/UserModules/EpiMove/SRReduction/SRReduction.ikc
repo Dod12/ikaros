@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<class name="SRReduction" description="Successor representation reduction">
+
+	<description type="text">
+		Calculates the mean of the successor representations
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="SRReduction"
+			name="SRReduction"
+		/>
+	</example>
+
+	<input name="SR1" description="Successor representation 1"/>
+	<input name="SR2" description="Successor representation 2"/>
+	<input name="SR3" description="Successor representation 3"/>
+	<input name="SR4" description="Successor representation 4"/>
+	<input name="SR5" description="Successor representation 5"/>
+	<input name="SR6" description="Successor representation 6"/>
+	<input name="SR7" description="Successor representation 7"/>
+	<input name="SR8" description="Successor representation 8"/>
+	<input name="SR9" description="Successor representation 9"/>
+	<input name="SR10" description="Successor representation 10"/>
+	<input name="SR11" description="Successor representation 11"/>
+
+	<output name="MEAN_SR" description="Mean successor representation" />
+
+	<link class="SRReduction" />
+
+	<author>
+		<name>Christian Balkenius</name>
+		<email>christian.balkenius@lucs.lu.se</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+		<homepage>http://www.lucs.lu.se/Christian.Balkenius</homepage>
+	</author>
+
+   <files>
+   		<file>MinimalModule.h</file>
+   		<file>MinimalModule.cc</file>
+   		<file>MinimalModule.ikc</file>
+   </files>
+
+</class>
