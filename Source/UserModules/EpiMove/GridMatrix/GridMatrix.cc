@@ -75,6 +75,8 @@ GridMatrix::Tick()
 {       
     set_matrix(grid_matrix, 0, grid_matrix_size_x, grid_matrix_size_y);
 
+    set_matrix(grid_matrix, 0, grid_matrix_size_x, grid_matrix_size_y);
+
     empty_cells.clear();
 
     for (int i = 0; i < r_array_size; ++i) {
