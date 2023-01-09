@@ -15,7 +15,7 @@
 		class = "GridMatrix"
 		name = "GridMatrix"
 		max_distance = "5"
-		output_size = "20"
+		output_size = "19"
 		_x="200"
 		_y="50"
 	/>
