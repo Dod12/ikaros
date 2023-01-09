@@ -1,7 +1,7 @@
 //
-//	MinimalModule.h		This file is a part of the IKAROS project
+//	GridMatrix.h		This file is a part of the IKAROS project
 // 						
-//    Copyright (C) 2012 <Author Name>
+//    Copyright (C) 2023 Daniel Carlström Schad
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -21,21 +21,23 @@
 //
 
 
-#ifndef OccupancyMap_
-#define OccupancyMap_
+#ifndef GridMatrix_
+#define GridMatrix_
 
 #include "IKAROS.h"
 
-class OccupancyMap: public Module
+class GridMatrix: public Module
 {
 public:
-    static Module * Create(Parameter * p) { return new OccupancyMap(p); }
+    static Module * Create(Parameter * p) { return new GridMatrix(p); }
 
-    OccupancyMap(Parameter * p) : Module(p) {}
-    ~OccupancyMap();
+    GridMatrix(Parameter * p) : Module(p) {}
+    ~GridMatrix();
 
     void 		Init();
     void 		Tick();
+
+    static std::vector<std::pair<int, int>> interpolate_bresenham(int x0, int y0, float x, float y);
 
     // Input arrays
 
@@ -45,17 +47,7 @@ public:
     float * theta_array;
     int theta_array_size;
 
-    float * position;
-    int position_size;
-
-    float * heading;
-    int heading_size;
-
     // Output arrays
-
-    float ** occupancy_matrix;
-    int occupancy_matrix_size_x;
-    int occupancy_matrix_size_y;
 
     float ** grid_matrix;
     int grid_matrix_size_x;
@@ -64,10 +56,8 @@ public:
     // Parameters
 
     float max_distance;
-    float prior, l_prior, empty_probability, l_empty, occupied_probability, l_occupied;
 
     std::vector<std::pair<int, int>> empty_cells;
-    std::vector<std::pair<int, int>> empty_cells_ego;
 
 private:
 };
