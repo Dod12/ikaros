@@ -3,7 +3,7 @@
 <class name="SRGradient" description="Create transition matrix from grid.">
 
 	<description type="text">
-		Module for creating transition matrix from observed gridmap.
+		Module for creating successor gradient from specific location.
 	</description>
 
 	<example description="A simple example">

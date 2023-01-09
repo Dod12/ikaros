@@ -21,7 +21,7 @@
             1	1	1	1	1	1	1	1	1"
 	/>
 
-	<module class="MazeGenerator" name="Maze" width="9" height="9" _x="25" _y="425" />
+	<module class="MazeGenerator" name="Maze" _x="25" _y="425" />
 
 	<module class = "TransitionMatrix" name = "Transition" _x = "150" _y = "425" />
 

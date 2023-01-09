@@ -16,7 +16,7 @@
 	<parameter name="start_position" description="Start position of the route" type="array" size="2" default="0.0 0.0" />
 
 	<input name="SR_GRADIENT" description="Gradient of the successor representation at a given location in the grid" />
-	<input name="TARGET_POSITION" description="Position of navigation target" size="2" />
+	<input name="TARGET_POSITION" description="Position of navigation target" /> 
 
 	<output name="ROUTE" description="Route from the centre of the grid to the maximum" />
 

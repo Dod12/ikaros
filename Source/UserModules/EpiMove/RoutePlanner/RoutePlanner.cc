@@ -30,7 +30,6 @@ void RoutePlanner::SetSizes()
     int sizex = GetInputSizeX("SR_GRADIENT");
     int sizey = GetInputSizeY("SR_GRADIENT");
     SetOutputSize("ROUTE", sizex, sizey);
-    SetInputSize("TARGET_POSITION", 2);
 }
 
 void
@@ -55,14 +54,22 @@ RoutePlanner::Tick()
     int pos_x = start_pos_x;
     int pos_y = start_pos_y;
 
-    while (true) {
+    int counter = 0;
+
+    while (counter < route_size_x * route_size_y) {
         route[pos_y][pos_x] = 1;
         float max = 0;
         int max_x = 0, max_y = 0;
 
-        for (int i = -1; i < 2; i++) {
-            for (int j = -1; j < 2; j++) {
+        if (pos_x == (int) target_position[0] && pos_y == (int) target_position[1]) {
+            break;
+        }
+
+        for (auto i : {-1, 0, 1}) {
+            for (auto j : {-1, 0, 1}) {
                 if (pos_x + i < 0 || pos_x + i >= sr_gradient_size_x || pos_y + j < 0 || pos_y + j >= sr_gradient_size_y) { // Check bounds
+                    continue;
+                } else if (i == 0 && j == 0) { // Skip current position
                     continue;
                 }
                 if (sr_gradient[pos_y + j][pos_x + i] > max) {
@@ -73,12 +80,9 @@ RoutePlanner::Tick()
             }
         }
 
-        if (max_x == 0 && max_y == 0 && pos_x == (int) target_position[0] && pos_y == (int) target_position[1]) {
-            break;
-        }
-
         pos_x += max_x;
         pos_y += max_y;
+        ++counter;
     }
 }
 
