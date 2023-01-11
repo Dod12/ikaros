@@ -47,8 +47,11 @@
 	<module
 		class = "OccupancyMap"
 		name = "OccupancyMap"
-		max_distance = "10" 
+		max_distance = "6" 
 		prior="0.5"
+		empty_probability="0.15"
+		occupied_probability="0.85"
+		output_size = "128"
 	/>
 
 	<connection source="LidarSensor.R_ARRAY" target="OccupancyMap.R_ARRAY" delay="0" />
@@ -57,7 +60,5 @@
 	<connection source="Position.HEADING" target="OccupancyMap.HEADING" delay="0" />
 	<connection source="Controller.POS_ESTIM" target="Position.POS_ESTIM" delay="0" />
 	<connection source="Controller.VEL_ESTIM" target="Position.VEL_ESTIM" delay="0" />
-
-	<module class = "Logger" name = "Logger" />
 </group>
  

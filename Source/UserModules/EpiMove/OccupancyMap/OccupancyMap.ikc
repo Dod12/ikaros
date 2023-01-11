@@ -17,14 +17,15 @@
 	<parameter name="prior" type="float" deafult="0.5" description="Prior expectation of walls" />
 	<parameter name="empty_probability" type="float" default="0.65" description="Evidence accumulated by an observation of empty space" />
 	<parameter name="occupied_probability" type="float" default="0.1" description="Evidence accumulated by an observation of occupied space" />
+	<parameter name="output_size" type="int" description="Size of the output grid" default="20" />
 
 	<input name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor" size="8192" />
 	<input name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor" size="8192" />
 	<input name="POSITION" description="x and y position of lidar sensor in allocentric space" size = "2" />
 	<input name="HEADING" description="Heading of lidarsensor in radians" size = "1" />
 
-	<output name="OCCUPANCY_MATRIX" description="Matrix of expected occupied cells in the grid" size_x="16" size_y="16" />
-	<output name="GRID_MATRIX" description="Matrix of positions of objects detected by the lidar sensor" size_x="16" size_y="16" />
+	<output name="OCCUPANCY_MATRIX" description="Matrix of expected occupied cells in the grid" size_param_x="output_size" size_param_y="output_size" />
+	<output name="GRID_MATRIX" description="Matrix of positions of objects detected by the lidar sensor" size_param_x="output_size" size_param_y="output_size" />
 
 	<link class="OccupancyMap" />
 

@@ -38,7 +38,6 @@ PathIntegrator::Init()
     // set, the default value specified in the ikc-file will be used instead.
 
     Bind(wheelbase, "wheelbase");
-    Bind(circumference, "wheel_circumference");
 
     io(pos_estim, pos_estim_size, "POS_ESTIM");
     io(vel_estim, vel_estim_size, "VEL_ESTIM");
@@ -71,14 +70,14 @@ PathIntegrator::Tick()
     float n_r = circumference * (encoder_counts[1] - prev_values[1]) / (float) 8192;
     */
 
-    float n_l = pos_estim[0];
-    float n_r = pos_estim[1];
+    float n_l = pos_estim[0] - prev_values[0];
+    float n_r = pos_estim[1] - prev_values[1];
 
     if (abs(n_l) < 1e-5 && abs(n_r) < 1e-5) { return; } // Skip updating the path if no movements.
 
     float R = (wheelbase / 2) * (n_l + n_r) / (n_r - n_l);
     float omega_delta_t =  (n_r + n_l) / wheelbase;
-    if (abs(R) >= 10) { // If  the radius of the arc is larger than 25 m, we can assume straight motion.
+    if (abs(R) >= 10) { // If  the radius of the arc is larger than 10 m, we can assume straight motion.
         std::cout << "Moving straight, R: " << R << std::endl;
         float movement = (n_r + n_l) / 2;
         position[0] += movement * cos(heading[0]);
