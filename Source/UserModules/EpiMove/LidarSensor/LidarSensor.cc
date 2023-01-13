@@ -59,8 +59,7 @@ LidarSensor::Init()
     } else {
         fprintf(stderr, "Failed to connect to LIDAR %08x\r\n", res);
     }
-    std::cout << "Initialization complete" << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(10));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     if (SL_IS_OK(res)) {
@@ -69,6 +68,7 @@ LidarSensor::Init()
     } else {
         fprintf(stderr, "Failed to get scan data from LIDAR %08x. Will not scan environment!\r\n", res);
     }
+    std::cout << "Initialization complete" << std::endl;
 }
 
 void
