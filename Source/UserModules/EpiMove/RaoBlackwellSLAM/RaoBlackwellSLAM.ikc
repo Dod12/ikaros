@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<class name="RaoBlackwellSLAM" description="Calculates location in space and occupancy map" >
+
+	<description type="text" >
+		Module implementing a Bayesian filter occupancy map.
+	</description>
+
+	<example description="A simple example" >
+		<module
+			class="RaoBlackwellSLAM"
+			name="RaoBlackwellSLAM"
+		/>
+	</example>
+
+	<parameter name="wheelbase" default="0.355" type="float" description="Robot wheelbase" />
+	<parameter name="num_particles" default="50" type="int" description="Number of particles to use in the Rao-Blackwell filter" />
+	<parameter name="cell_size" default="0.25" type="float" description="Size of each cell in the occupancy grid in meters" />
+	<parameter name="z_hit" default="0.8" type="float" description="Probability of a hit" />
+	<parameter name="z_short" default="0.05" type="float" description="Probability of a short reading" />
+	<parameter name="z_max" default="0.05" type="float" description="Probability of a maximum reading" />
+	<parameter name="z_rand" default="0.1" type="float" description="Probability of a random reading" />
+	<parameter name="sigma_hit" default="0.2" type="float" description="Standard deviation of the Gaussian distribution for the hit model" />
+	<parameter name="p_unknown" default="0.5" type="float" description="Probability of an unknown cell being occupied" />
+	<parameter name="p_occupied" default="0.9" type="float" description="Probability of an occupied cell being occupied" />
+	<parameter name="p_free" default="0.1" type="float" description="Probability of a free cell being occupied" />
+	<parameter name="alpha" default="0.25" type="float" description="Thickness of obstacles in meters" />
+	<parameter name="beta" default="0.087" type="float" description="Beam width in radians" />
+	<parameter name="lidar_max_range" default="25" type="float" description="Maximum range of the lidar sensor in meters" />
+	<parameter name="lidar_x_offset" default="0" type="float" description="Offset of the lidar sensor in the x direction in meters" />
+	<parameter name="lidar_y_offset" default="0.160" type="float" description="Offset of the lidar sensor in the y direction in meters" />
+	<parameter name="lidar_angle_offset" default="0" type="float" description="Offset of the lidar sensor in the angle direction in radians" />
+	<parameter name="output_size" default="40" type="int" description="Size of the output grid in cells" />
+
+	<input name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor"/>
+	<input name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor"/>
+	<input name="POS_ESTIM" description="Estimated position of left and right weel in meters" size = "2" />
+	<input name="VEL_ESTIM" description="Estimated velocity of left and right weel in meters per second" size = "2" />
+
+	<output name="OCCUPANCY_MAP" description="Matrix of expected occupied cells in the grid" size_param_x="output_size" size_param_y="output_size" />
+	<output name="HEADING" description="Heading of the robot in radians" size = "1" />
+	<output name="POSITION" description="Position of the robot in meters" size = "2" />
+
+	<link class="RaoBlackwellSLAM" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>RaoBlackwellSLAM.h</file>
+   		<file>RaoBlackwellSLAM.cc</file>
+   		<file>RaoBlackwellSLAM.ikc</file>
+   </files>
+
+</class>
