@@ -56,34 +56,28 @@ PathIntegrator::Init()
 void
 PathIntegrator::Tick()
 {       
-    /*
-    if (prev_values[0] == 0 && prev_values[1] == 0) { // On the first tick, we need to initialize the encoder counts.
-        prev_values[0] = encoder_counts[0];
-        prev_values[1] = encoder_counts[1];
-        return;
-    }
-    */
-    //if (ticks != 10) { ++ticks; return; } // Run every 4th tick.
-
-    /*
-    float n_l = circumference * (encoder_counts[0] - prev_values[0]) / (float) 8192;
-    float n_r = circumference * (encoder_counts[1] - prev_values[1]) / (float) 8192;
-    */
 
     float n_l = pos_estim[0] - prev_values[0];
     float n_r = pos_estim[1] - prev_values[1];
 
-    if (abs(n_l) < 1e-5 && abs(n_r) < 1e-5) { return; } // Skip updating the path if no movements.
+    if (abs(n_l) < 1e-3 && abs(n_r) < 1e-3) // Skip updating the path if movements are smaller than a mm.
+    {
+        prev_values[0] = pos_estim[0];
+        prev_values[1] = pos_estim[1];
+        return;
+    } 
+
+    std::cout << "n_l: " << n_l << ", n_r: " << n_r << std::endl;
 
     float R = (wheelbase / 2) * (n_l + n_r) / (n_r - n_l);
-    float omega_delta_t =  (n_r + n_l) / wheelbase;
+    float omega_delta_t =  (n_r - n_l) / wheelbase;
     if (abs(R) >= 10) { // If  the radius of the arc is larger than 10 m, we can assume straight motion.
-        std::cout << "Moving straight, R: " << R << std::endl;
+        std::cout << "Moving straight, R: " << R << ", omega: " << omega_delta_t << std::endl;
         float movement = (n_r + n_l) / 2;
         position[0] += movement * cos(heading[0]);
         position[1] += movement * sin(heading[0]);
     } else { // Calculate arclength 
-        std::cout << "Moving in arc, R: " << R << std::endl;
+        std::cout << "Moving in arc, R: " << R << ", omega: " << omega_delta_t << std::endl;
         
         rotation_centre[0] = position[0] - R * sin(heading[0]);
         rotation_centre[1] = position[1] + R * cos(heading[0]);
@@ -92,7 +86,7 @@ PathIntegrator::Tick()
         float new_y = sin(omega_delta_t) * (position[0] - rotation_centre[0]) + cos(omega_delta_t) * (position[1] - rotation_centre[1]) + rotation_centre[1];
         position[0] = new_x;
         position[1] = new_y;
-        heading[0] = remainder(heading[0] + omega_delta_t, 2*M_PI);
+        heading[0] = heading[0] - omega_delta_t;
     }
     std::cout << "OUTPUT: X: " << position[0] << ", Y: " << position[1] << ", Heading: " << heading[0] << std::endl;
     prev_values[0] = pos_estim[0];
