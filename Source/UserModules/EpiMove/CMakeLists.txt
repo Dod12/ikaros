@@ -11,6 +11,7 @@ add_subdirectory(SRGradient)
 add_subdirectory(SRReduction)
 add_subdirectory(RoutePlanner)
 add_subdirectory(GridMatrix)
+add_subdirectory(RaoBlackwellSLAM)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)
