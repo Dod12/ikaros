@@ -180,6 +180,7 @@ public:
     float prior, l_prior, empty_probability, l_empty, occupied_probability, l_occupied;
 
     std::vector<std::pair<int, int>> empty_cells;
+    std::vector<std::pair<int, int>> empty_cells_ego;
 
 private:
 };

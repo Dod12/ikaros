@@ -62,10 +62,10 @@ LidarSensor::Init()
     std::cout << "Initialization complete" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(10));
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     if (SL_IS_OK(res)) {
-    std::thread poller_thread(&LidarSensor::poller, this, 100);
-    poller_thread.detach();
+        std::thread poller_thread(&LidarSensor::poller, this, 125);
+        poller_thread.detach();
     } else {
         fprintf(stderr, "Failed to get scan data from LIDAR %08x. Will not scan environment!\r\n", res);
     }
@@ -82,7 +82,7 @@ void LidarSensor::poller(int sleep_millis)
     while (get_poller()) {
         res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
         if (SL_IS_OK(res)) {
-            if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of same size"); }
+            if (r_array_size != theta_array_size) { Notify(msg_warning, "R_ARRAY and THETA_ARRAY must be of same size"); }
             
             for (int i = 0; i < r_array_size; ++i) {
                 theta_array[i] = ((float) measurements[i].angle_z_q14 * 90.f / (1 << 14)) * 2 * M_PI / 360;
@@ -95,9 +95,19 @@ void LidarSensor::poller(int sleep_millis)
     }
 }
 
-void LidarSensor::stop_poller() { poller_mutex.lock(); run_poller = false; poller_mutex.unlock(); }
+void LidarSensor::stop_poller() {
+    poller_mutex.lock();
+    run_poller = false;
+    poller_mutex.unlock();
+}
 
-bool LidarSensor::get_poller() { bool ret; poller_mutex.lock(); ret = run_poller; poller_mutex.unlock(); return ret; }
+bool LidarSensor::get_poller() {
+    bool ret;
+    poller_mutex.lock();
+    ret = run_poller;
+    poller_mutex.unlock();
+    return ret;
+}
 
 LidarSensor::~LidarSensor()
 {

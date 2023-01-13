@@ -56,11 +56,10 @@ ODriveController::Init()
 
     // Reboot to make sure there are no problems
     odrive->ClearErrors();
-    // odrive->Reboot();
-    // std::this_thread::sleep_for(std::chrono::seconds(1));
-
-    // delete odrive;
-    // odrive = new ODriveSerial(serial_port, baud_rate, 50);
+    odrive->Reboot();
+    delete odrive;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    odrive = new ODriveSerial(serial_port, baud_rate, 50);
 
     // Test connnection
     try 

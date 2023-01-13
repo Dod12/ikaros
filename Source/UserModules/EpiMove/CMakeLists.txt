@@ -10,6 +10,7 @@ add_subdirectory(SuccessorRepresentation)
 add_subdirectory(SRGradient)
 add_subdirectory(SRReduction)
 add_subdirectory(RoutePlanner)
+add_subdirectory(GridMatrix)
 
 
 set(SOURCE ${SOURCE} PARENT_SCOPE)

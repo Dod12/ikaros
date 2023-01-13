@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<group title="Lidar Route Planner">
+
+	<module
+		class = "LidarSensor"
+		name = "LidarSensor"
+		serial_port = "/dev/tty.usbserial-0001"
+		baud_rate = "256000"
+		_x="50"
+		_y="50"
+	/>
+
+	<module
+		class = "GridMatrix"
+		name = "GridMatrix"
+		max_distance = "5"
+		output_size = "19"
+		_x="200"
+		_y="50"
+	/>
+
+	<connection source="LidarSensor.R_ARRAY" target="GridMatrix.R_ARRAY" />
+	<connection source="LidarSensor.THETA_ARRAY" target="GridMatrix.THETA_ARRAY" />
+
+	<module class = "TransitionMatrix" name = "Transition" _x = "350" _y = "50" />
+	<module class="SuccessorRepresentation" name="SR95" gamma="0.95" _x="500" _y="50" />
+	<module class="SRGradient" name="SRGradient" _x="650" _y="50" />
+	<module class="RoutePlanner" name="RoutePlanner" _x="800" _y="50" />
+
+	<connection  source = "GridMatrix.GRID_MATRIX"  target = "Transition.OBSTACLE_GRID" delay="0" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR95.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "SR95.SUCCESSOR_REPRESENTATION"  target = "SRGradient.SUCCESSOR_REPRESENTATION" delay="1" />
+	<connection  source = "SRGradient.TARGET_POSITION"  target = "RoutePlanner.TARGET_POSITION" delay="0" />
+	<connection  source = "SRGradient.SR_GRADIENT"  target = "RoutePlanner.SR_GRADIENT" delay="0" />
+
+	<view  name = "TransitionMatrix">
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "GridMatrix.GRID_MATRIX" x = "10" y = "10" valueLow="0" valueHigh="1" command="RoutePlanner.set_position"/>
+		<!--<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "SRMean.MEAN_SR" x = "810" y = "10" />-->
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "10" y = "410" command="SRGradient.set_position" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Route Planner" direction = "horizontal" source = "RoutePlanner.ROUTE" x = "410" y = "410" />
+	</view>
+
+</group>
+ 

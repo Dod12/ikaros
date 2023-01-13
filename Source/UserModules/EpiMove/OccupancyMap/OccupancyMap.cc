@@ -72,6 +72,8 @@ OccupancyMap::Init()
     // Get input arrays
     io(r_array, r_array_size, "R_ARRAY");
     io(theta_array, theta_array_size, "THETA_ARRAY");
+    if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "Input arrays must be of equal size"); }
+
     io(position, position_size, "POSITION");
     io(heading, heading_size, "HEADING");
 
@@ -81,17 +83,19 @@ OccupancyMap::Init()
     io(occupancy_matrix, occupancy_matrix_size_x, occupancy_matrix_size_y, "OCCUPANCY_MATRIX");
     set_matrix(occupancy_matrix, 0, occupancy_matrix_size_x, occupancy_matrix_size_y);
 
-    empty_cells.reserve(occupancy_matrix_size_x*occupancy_matrix_size_y/2);
+    empty_cells_ego.reserve(occupancy_matrix_size_x*occupancy_matrix_size_y/2);
 }
 
 void
 OccupancyMap::Tick()
-{   
-    if (r_array_size != theta_array_size) { Notify(msg_fatal_error, "Input arrays must be of equal size"); }
-    
+{       
     set_matrix(grid_matrix, 0, grid_matrix_size_x, grid_matrix_size_y);
 
+    int half_x = occupancy_matrix_size_x / 2;
+    int half_y = occupancy_matrix_size_y / 2;
+
     empty_cells.clear();
+    empty_cells_ego.clear();
 
     for (int i = 0; i < r_array_size; ++i) {
         float x_egocentric = r_array[i] * cos(theta_array[i]);
@@ -108,20 +112,24 @@ OccupancyMap::Tick()
 
         //std::cout << "r: " << r_array[i] << ", theta: " << theta_array[i] << std::endl;
 
-        int x_index = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
+        int x_index = std::clamp((int) (half_x * (x / max_distance) + half_x), 0, occupancy_matrix_size_x - 1);
         int y_index = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
         int x_index_ego = std::clamp((int) ((occupancy_matrix_size_x / 2) * (x_egocentric / max_distance) + (occupancy_matrix_size_x / 2)), 0, occupancy_matrix_size_x - 1);
         int y_index_ego = std::clamp((int) ((occupancy_matrix_size_y / 2) * (y_egocentric / max_distance) + (occupancy_matrix_size_y / 2)), 0, occupancy_matrix_size_y - 1);
         occupancy_matrix[x_index][y_index] += l_occupied - l_prior;
-        grid_matrix[x_index_ego][y_index_ego] = 1; // Setting the grid to 1 means that there is an obstacle in the cell
 
         auto bresenham_cells = interpolate_bresenham(occupancy_matrix_size_x / 2, occupancy_matrix_size_y / 2, x_index, y_index);
+        auto bresenham_cells_ego = interpolate_bresenham(occupancy_matrix_size_x / 2, occupancy_matrix_size_y / 2, x_index_ego, y_index_ego);
 
         empty_cells.insert(empty_cells.end(), bresenham_cells.begin(), bresenham_cells.end());
+        empty_cells_ego.insert(empty_cells_ego.end(), bresenham_cells_ego.begin(), bresenham_cells_ego.end());
     }
 
     for (auto&& [x, y] : empty_cells) {
         occupancy_matrix[x][y] += l_empty - l_prior;
+    }
+    for (auto&& [x, y] : empty_cells_ego) {
+        grid_matrix[x][y] = 1;
     }
 }
 

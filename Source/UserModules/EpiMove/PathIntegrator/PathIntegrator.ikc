@@ -15,7 +15,6 @@
 	</example>
 
 	<parameter name="wheelbase" description="Length of the wheelbase in meters" default="0.3555" />
-	<parameter name="wheel_circumference" type="float" default="0.098182" description="Meters travelled in one turn on the encoder, may differ from actual circumference if reduction gear is used." />
 
 	<input name="POS_ESTIM" description="Left and right axis position estimates" size="2" />
 	<input name="VEL_ESTIM" description="Left and right axis velocity estimates" size="2" />
