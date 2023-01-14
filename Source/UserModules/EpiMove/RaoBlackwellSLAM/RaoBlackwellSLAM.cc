@@ -144,7 +144,7 @@ RaoBlackwellSLAM::Init()
 void
 RaoBlackwellSLAM::Tick()
 {       
-    if (ticks == 0)
+    if (GetTick() == 0)
     {
         for (auto& particle : particles)
             particle.map = update_map(particle.map, particle.location);
