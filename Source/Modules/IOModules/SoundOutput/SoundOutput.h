@@ -1,7 +1,7 @@
 //
 //	SoundOutput.h		This file is a part of the IKAROS project
 // 						
-//    Copyright (C) 2014 Christian Balkenius
+//    Copyright (C) 2014-2022 Christian Balkenius
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ class Sound
         Sound(const std::string & s) : sound_path(s) { timer = new Timer(); };
 
         void    Play(const char * command);
-        bool    UpdateVolume(float * rms);  // returns true of still playing
+        bool    UpdateVolume(float * rms, float lag=0);  // returns true if still playing
 
         std::string sound_path;
         std::vector<float> time;
@@ -53,17 +53,27 @@ class Sound
 class SoundOutput: public Module
 {
 public:
-    float * input;
-    float * last_input;
+    float * trig;
+    float * last_trig;
     int     size;
+    float * inhibition;
+
+    float * playing;
+    float * completed;
+    float * active;
 
     float * rms;
     float * volume;
     
+    float   scale_volume;
+    float   lag;
+
     const char *  command;
     
     std::vector<Sound> sound;
+    int queued_sound;
     int current_sound;
+    int last_sound;
 
 
     static Module * Create(Parameter * p) { return new SoundOutput(p); }
