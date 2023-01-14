@@ -40,13 +40,6 @@ static constexpr T prob(T l)
     return 1/(1+exp(-l));
 }
 
-struct RobotLocation
-{
-    float x;
-    float y;
-    float angle;
-};
-
 struct LidarSensor
 {
     float x_offset, y_offset;
@@ -54,122 +47,66 @@ struct LidarSensor
     float max_range;
 };
 
-struct GridMap
+struct Pose
 {
-    float ** data;
-    size_t size_x;
-    size_t size_y;
-    float cell_size;
-    bool destroy_map;
-    float l_0;
-
-    GridMap(float ** map, size_t size_x, size_t size_y, float cell_size) : data(map), size_x(size_x), size_y(size_y), cell_size(cell_size), destroy_map(false) {}
-    GridMap(size_t size_x, size_t size_y, float cell_size, float l_0) : size_x(size_x), size_y(size_y), cell_size(cell_size), destroy_map(true)
-    {
-        data = create_matrix(size_x, size_y);
-        set_matrix(data, l_0, size_x, size_y);
-    }
-    GridMap(const GridMap & other) : size_x(other.size_x), size_y(other.size_y), cell_size(other.cell_size), destroy_map(true) {
-        data = create_matrix(size_x, size_y);
-        copy_matrix(data, other.data, size_x, size_y);
-    }
-
-    ~GridMap()
-    {
-        if (destroy_map)
-            destroy_matrix(data);
-    }
-
-    float * operator[](size_t x) { return data[x]; }
-
-    size_t GetXIndex(float x) const { return std::clamp((size_t) (x / cell_size) + size_x / 2, (unsigned long) 0, (unsigned long) size_x); }
-    size_t GetYIndex(float y) const { return std::clamp((size_t) (y / cell_size) + size_y / 2, (unsigned long) 0, (unsigned long) size_y); }
-
-    float GetXCoordinate(size_t x) const { return x * cell_size + cell_size/2; }
-    float GetYCoordinate(size_t y) const { return y * cell_size + cell_size/2; }
-
-    std::pair<int, int> GetClosestOccupiedCell(float x_pos, float y_pos) const 
-    {   
-        size_t x_index = GetXIndex(x_pos);
-        size_t y_index = GetYIndex(y_pos);
-
-        for (int r = 1; r < size_x; ++r)
-        {
-            int closest_x = -1, closest_y = -1;
-            float closest_distance;
-            
-            for (int x = -r; x <= r; ++x)
-            {
-                for (int y = -r; y <= r; ++y)
-                {
-                    if ((abs(x) == r || abs(y) == r) && x_index + x >= 0 && x_index + x < size_x && y_index + y >= 0 && y_index + y < size_y)
-                    {
-                        if (data[x_index + x][y_index + y] >= log_odds(0.65))
-                        {
-                            float distance = sqrt(pow(x_pos - GetXCoordinate(x_index + x), 2) + pow(y_pos - GetYCoordinate(y_index + y), 2));
-                            if (distance < closest_distance)
-                            {
-                                closest_x = x_index + x;
-                                closest_y = y_index + y;
-                                closest_distance = distance;
-                            }
-                        }
-                    }
-                }
-            }
-            if (closest_x != -1 || closest_y != -1)
-                return std::make_pair(closest_x, closest_y);
-        }
-        return std::make_pair(-1, -1);
-    }
-
-    float GetClosestOccupiedDistance(float x_pos, float y_pos) const
-    {
-        size_t x_index = GetXIndex(x_pos);
-        size_t y_index = GetYIndex(y_pos);
-
-        for (int r = 1; r < size_x; ++r)
-        {
-            int closest_x = -1, closest_y = -1;
-            float closest_distance;
-            
-            for (int x = -r; x <= r; ++x)
-            {
-                for (int y = -r; y <= r; ++y)
-                {
-                    if ((abs(x) == r || abs(y) == r) && x_index + x >= 0 && x_index + x < size_x && y_index + y >= 0 && y_index + y < size_y)
-                    {
-                        if (data[x_index + x][y_index + y] >= log_odds(0.65))
-                        {
-                            float distance = sqrt(pow(x_pos - GetXCoordinate(x_index + x), 2) + pow(y_pos - GetYCoordinate(y_index + y), 2));
-                            if (distance < closest_distance)
-                            {
-                                closest_x = x_index + x;
-                                closest_y = y_index + y;
-                                closest_distance = distance;
-                            }
-                        }
-                    }
-                }
-            }
-            if (closest_x != -1 || closest_y != -1)
-                return closest_distance;
-        }
-        return -1;
-    }
+    float x;
+    float y;
+    float angle;
 };
 
-struct Particle
+class Particle
 {
-    RobotLocation location;
+public:
+    float ** grid;
+    float grid_size_x;
+    float grid_size_y;
+    float cell_size;
+
+    Pose pose;
+
     float weight;
-    GridMap map;
 
-    explicit Particle(RobotLocation location, GridMap* map) : location(location), map(*map) {}
+    Particle(float ** grid, float grid_size_x, float grid_size_y, float cell_size, Pose pose, float weight, LidarSensor sensor, float l_0, float l_occ, float l_free, float z_hit, float z_short, float z_max, float z_rand, float alpha, float beta, float sigma_hit, float lambda_short);
 
-    Particle(RobotLocation location, GridMap map) : location(location), map(map) {}
-    
-    Particle(RobotLocation location, float weight, GridMap map) : location(location), weight(weight), map(map) {}
+    Particle operator=(const Particle& other);
+
+    // Samples the motion model and returns the new pose
+    Pose& sample_motion_model(float d_t, float velocity, float omega, std::default_random_engine& generator);
+
+    // Calculates probability of current Lidar scan given the current pose and the old map
+    float measurement_model(float * r_array, float * theta_array, int array_size);
+
+    // Iterate over scan beams and update grid cells
+    void update_map(float * r_array, float * theta_array, int array_size);
+
+private:
+
+    LidarSensor sensor;
+
+    float l_0;
+    float l_occ;
+    float l_free;
+
+    float z_hit = 0.8f;
+    float z_short = 0.1f;
+    float z_max = 0.05f;
+    float z_rand = 0.05f;
+
+    float alpha = 0.1; // Velocity noise
+    float beta = 0.1;  // Angular velocity noise
+
+    float sigma_hit = 0.1; // Standard deviation of the Gaussian distribution for the hit model
+    float lambda_short = 0.1; // Decay rate of the exponential distribution for the short model
+
+    // Ray cast on the map to find the "true" distanace to the obstacle in the direction of the Lidar beam
+    float ray_cast(float angle);
+
+    // Proboabilities for the measurement model
+
+    float prob_hit(float z_star, float z);
+    float prob_short(float z_star, float z);
+    float prob_max(float z_star, float z);
+    float prob_rand(float z_star, float z);
 };
 
 class RaoBlackwellSLAM: public Module
@@ -182,16 +119,6 @@ public:
 
     void 		Init();
     void 		Tick();
-
-    RobotLocation 	sample_motion_model_velocity(RobotLocation& location, float d_t, float velocity, float omega);
-    RobotLocation 	sample_motion_model_odometry(RobotLocation& location);
-
-    float           measurement_model_likelihood(const RobotLocation& location, const GridMap& map);
-    float           measurement_model_beam_range(const RobotLocation& location, const GridMap& map);
-
-    float           inverse_sensor_model(float x_coord, float y_coord, const RobotLocation& location);
-
-    GridMap&        update_map(GridMap& map, const RobotLocation& location);
 
     // Parameters
     float wheelbase;
@@ -236,16 +163,17 @@ public:
     int vel_estim_size;
 
     // Structs
-    RobotLocation robot_location;
+    Pose robot_location;
     LidarSensor sensor;
 
+    std::vector<float **> maps;
     std::vector<Particle> particles;
     std::vector<Particle> new_particles;
 
     std::vector<float> weights;
 
     std::random_device random_device;
-    std::mt19937 generator;
+    std::default_random_engine generator;
     std::discrete_distribution<int> distribution;
 
     // Output arrays

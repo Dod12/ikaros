@@ -21,38 +21,8 @@
 //
 
 #include "RaoBlackwellSLAM.h"
-#include <iostream>
 
 using namespace ikaros;
-
-// Normal distribution helper functions
-template <typename T>
-static constexpr T prob_normal_distribution(T a, T b2)
-{
-    return exp(-pow(a,2)/(2*b2))/sqrt(2*M_PI*b2);
-}
-
-template <typename T>
-static constexpr T sample_normal_distribution(T a, T b2)
-{
-    float acc = 0;
-    for (int i = 0; i < 12; ++i)
-        acc += (float) random(-b2,b2);
-    return a + 0.5 * acc;
-}
-
-// Variadic min
-template <typename T>
-static constexpr T min(T a)
-{
-    return a;
-}
-
-template <typename First, typename... Rest>
-constexpr First min(First a, const Rest&... rest)
-{
-    return std::min({std::cref(rest)...}, a).get();
-}
 
 void
 RaoBlackwellSLAM::Init()
@@ -97,7 +67,7 @@ RaoBlackwellSLAM::Init()
     Bind(y_offset, "lidar_y_offset");
     Bind(angle_offset, "lidar_angle_offset");
 
-    generator = std::mt19937(random_device());
+    generator = std::default_random_engine(random_device());
     distribution = std::discrete_distribution<int>();
 
     // Input arrays
@@ -122,7 +92,7 @@ RaoBlackwellSLAM::Init()
     sensor.y_offset = y_offset;
     sensor.max_range = max_range;
 
-    robot_location = RobotLocation();
+    robot_location = Pose();
     robot_location.x = 0;
     robot_location.y = 0;
     robot_location.angle = 0;
@@ -131,12 +101,12 @@ RaoBlackwellSLAM::Init()
     new_particles.reserve(num_particles);
     weights.reserve(num_particles);
 
-    GridMap map(occupancy_map_size_x, occupancy_map_size_y, cell_size, l_0);
-    // update_map(map, robot_location);
-
-    for (int i = 0; i < num_particles; ++i)
-    {   
-        particles.push_back(Particle(robot_location, map));
+    for (size_t i = 0; i < num_particles; i++)
+    {
+        maps.push_back(create_matrix(occupancy_map_size_x, occupancy_map_size_y));
+        set_matrix(maps[i], occupancy_map_size_x, occupancy_map_size_y, l_0);
+        particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, alpha1, alpha2, sigma_hit, 0.4));
+        weights.push_back(1 / num_particles);
     }
 
 }
@@ -147,142 +117,45 @@ RaoBlackwellSLAM::Tick()
     if (GetTick() == 0)
     {
         for (auto& particle : particles)
-            particle.map = update_map(particle.map, particle.location);
+            particle.update_map(r_array, theta_array, r_array_size);
     }
 
-    new_particles.clear();
+    float velocity = (vel_estim[0] + vel_estim[1]) / 2;
+    float omega = (vel_estim[1] - vel_estim[0]) / wheelbase;
+
     weights.clear();
 
+    // Loop through all particles and update their location and map
     for (auto& particle : particles)
     {
-        particle.location = sample_motion_model_odometry(particle.location);
-        weights.push_back(measurement_model_likelihood(particle.location, particle.map));
-        particle.map = std::move(update_map(particle.map, particle.location));
-        new_particles.push_back(std::move(particle));
+        particle.sample_motion_model(GetTickLength(), velocity, omega, generator);
+        weights.push_back(particle.measurement_model(r_array, theta_array, r_array_size));
+        particle.update_map(r_array, theta_array, r_array_size);
     }
 
+    // Get best particle
+    auto best_particle = std::max_element(particles.begin(), particles.end(), [](const Particle& a, const Particle& b) { return a.weight < b.weight; });
+    robot_location = best_particle->pose;
+    copy_matrix(occupancy_map, best_particle->grid, occupancy_map_size_x, occupancy_map_size_y);
+    position[0] = robot_location.x;
+    position[1] = robot_location.y;
+    heading[0] = robot_location.angle;
+
+    // Resample
     distribution = std::discrete_distribution<int>(weights.begin(), weights.end());
+    new_particles = std::move(particles);
     particles.clear();
-
-    for (int i = 0; i < num_particles; ++i)
+    for (size_t i = 0; i < num_particles; i++)
     {
-        particles.emplace_back(new_particles[distribution(generator)]);
+        int index = distribution(generator);
+        particles.push_back(std::move(new_particles[index]));
     }
-    for (int i = 0; i < occupancy_map_size_x; ++i)
-    {
-        for (int j = 0; j < occupancy_map_size_y; ++j)
-        {
-            occupancy_map[i][j] = prob(particles[0].map.data[i][j]);
-        }
-    }
-    heading[0] = particles[0].location.angle;
-    position[0] = particles[0].location.x;
-    position[1] = particles[0].location.y;
-}
-
-RobotLocation RaoBlackwellSLAM::sample_motion_model_velocity(RobotLocation& location, float d_t, float velocity, float omega)
-{
-    float v_hat = velocity + sample_normal_distribution((float) 0, alpha1 * velocity * velocity + alpha2 * omega * omega);
-    float omega_hat = omega + sample_normal_distribution((float) 0, alpha3 * velocity * velocity + alpha4 * omega * omega);
-    float gamma_hat = sample_normal_distribution((float) 0, alpha5 * velocity * velocity + alpha6 * omega * omega);
-
-    location.x = location.x + (v_hat / omega_hat) * (sin(location.angle + omega_hat * d_t) - sin(location.angle));
-    location.y = location.y + (v_hat / omega_hat) * (cos(location.angle) - cos(location.angle + omega_hat * d_t));
-    location.angle = location.angle + omega_hat * d_t + gamma_hat * d_t;
-    return location;
-}
-
-
-RobotLocation RaoBlackwellSLAM::sample_motion_model_odometry(RobotLocation& location)
-{   
-    float l_l_hat = pos_estim[0] + sample_normal_distribution((float) 0, alpha1 * pos_estim[0] * pos_estim[0] + alpha2 * pos_estim[1] * pos_estim[1]);
-    float l_r_hat = pos_estim[1] + sample_normal_distribution((float) 0, alpha3 * pos_estim[0] * pos_estim[0] + alpha4 * pos_estim[1] * pos_estim[1]);
-    float r = wheelbase / 2 * (l_l_hat + l_r_hat) / (l_r_hat - l_l_hat);
-    float omega_delta_t = (l_r_hat - l_l_hat) / wheelbase;
-    float ICC_x = location.x - r * sin(location.angle);
-    float ICC_y = location.y + r * cos(location.angle);
-    
-    location.x = ICC_x + (location.x - ICC_x) * cos(omega_delta_t) - (location.y - ICC_y) * sin(omega_delta_t);
-    location.y = ICC_y + (location.x - ICC_x) * sin(omega_delta_t) + (location.y - ICC_y) * cos(omega_delta_t);
-    location.angle = location.angle + omega_delta_t;
-    return location;
-}
-
-float RaoBlackwellSLAM::measurement_model_beam_range(const RobotLocation& location, const GridMap& map)
-{
-    float q = 1;
-    for (int i = 0; i < r_array_size; ++i)
-    {
-        
-    }
-    return q;
-}
-
-float RaoBlackwellSLAM::measurement_model_likelihood(const RobotLocation& location, const GridMap& map)
-{
-    double q = 1;
-    for (int i = 0; i < r_array_size; ++i)
-    {
-        if (r_array[i] == 0 || r_array[i] >= sensor.max_range)
-            continue;
-        
-        double z_x = location.x + sensor.x_offset + r_array[i] * cos(location.angle + sensor.angle_offset + theta_array[i]);
-        double z_y = location.y + sensor.y_offset + r_array[i] * sin(location.angle + sensor.angle_offset + theta_array[i]);
-        float distance = map.GetClosestOccupiedDistance(z_x, z_y);
-        q *= z_hit * prob_normal_distribution(distance, sigma_hit) + z_rand / z_max;
-    }
-    return q;
-}
-
-float RaoBlackwellSLAM::inverse_sensor_model(float x_coord, float y_coord, const RobotLocation& location)
-{
-    float r = sqrt(pow(x_coord - location.x, 2) + pow(y_coord - location.y, 2));
-    float phi = atan2(y_coord - location.y, x_coord - location.x) - location.angle;
-    int min_phase_index = -1;
-    float min_phase_diff = 2 * M_PI;
-    for (int i = 0; i < r_array_size; ++i)
-    {
-        float phase_diff = abs(phi - theta_array[i]+sensor.angle_offset);
-        if (phase_diff < min_phase_diff)
-        {
-            min_phase_diff = phase_diff;
-            min_phase_index = i;
-        } else if (min_phase_index != -1 && phase_diff > min_phase_diff) // Angles are monotonically increasing, so we can stop if we found a local minimum
-        {
-            break;
-        }
-    }
-    if (r > min(z_max, r_array[min_phase_index] + alpha/2) || 
-        abs(phi - theta_array[min_phase_index]+sensor.angle_offset) > beta/2)
-        return l_0;
-    else if (r_array[min_phase_index] < z_max && abs(r - r_array[min_phase_index]) < alpha/2)
-        return l_occupied;
-    else if (r < r_array[min_phase_index])
-        return l_free;
-    else
-        return l_0; // This should never happen
-}
-
-GridMap& RaoBlackwellSLAM::update_map(GridMap& map, const RobotLocation& location)
-{
-    for (int i = 0; i < map.size_x; ++i)
-    {
-        for (int j = 0; j < map.size_y; ++j)
-        {   
-            float x_coord = map.GetXCoordinate(i);
-            float y_coord = map.GetYCoordinate(j);
-
-            // If cell is in max radius of sensor, update it
-            if (sqrt(pow(x_coord - location.x, 2) + pow(y_coord - location.y, 2)) < sensor.max_range)
-                map[i][j] = map[i][j] + inverse_sensor_model(x_coord, y_coord, location) - l_0;
-        }
-    }
-    return map;
 }
 
 RaoBlackwellSLAM::~RaoBlackwellSLAM()
 {
-    
+    for (auto& map : maps)
+        destroy_matrix(map);
 }
 
 static InitClass init("RaoBlackwellSLAM", &RaoBlackwellSLAM::Create, "Source/UserModules/EpiMove/RaoBlackwellSLAM/");
