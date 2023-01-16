@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<group title="Sensing and navigating example">
+
+	<!--Motor modules-->
+	<module class = "TargetArrayControls" name = "Controls" _x="50" _y="150" />
+	<module  class = "ODriveController" name = "Controller" input_mode  = "3" control_mode  = "3" input_filter_bandwidth = "2" serial_port = "/dev/tty.usbmodem206839A14D4D1" _x="200" _y="150" />
+
+	<connection source="Controls.POS_TARGET" target="Controller.POS_TARGET" />
+
+	<!--Sensing modules-->
+	<module class = "LidarSensor" name = "LidarSensor" serial_port = "/dev/tty.usbserial-0001" baud_rate = "256000" _x="200" _y="50" />
+	<module class = "RaoBlackwellSLAM" name = "SLAM" max_distance = "5" output_size = "32" _x="350" _y="50" />
+
+	<connection source="LidarSensor.R_ARRAY" target="SLAM.R_ARRAY" delay="0" />
+	<connection source="LidarSensor.THETA_ARRAY" target="SLAM.THETA_ARRAY" delay="0" />
+	<connection source="LidarSensor.N_SAMPLES" target="SLAM.N_SAMPLES" delay="0" />
+	<connection source="Controller.POS_ESTIM" target="SLAM.POS_ESTIM" delay="0" />
+	<connection source="Controller.VEL_ESTIM" target="SLAM.VEL_ESTIM" delay="0" />
+
+	<!--Navigation modules-->
+	<module class = "TransitionMatrix" name = "Transition" _x = "500" _y = "50" />
+	<module class="SuccessorRepresentation" name="SR" gamma="0.98" _x="650" _y="50" />
+	<module class="SRGradient" name="SRGradient" _x="800" _y="50" />
+	<module class="RoutePlanner" name="RoutePlanner" _x="950" _y="50" />
+
+	<connection  source = "SLAM.OCCUPANCY_MAP"  target = "Transition.OBSTACLE_GRID" delay="0" />
+	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR.TRANSITION_MATRIX" delay="1" />
+	<connection  source = "SR.SUCCESSOR_REPRESENTATION"  target = "SRGradient.SUCCESSOR_REPRESENTATION" delay="1" />
+	<connection  source = "SRGradient.TARGET_POSITION"  target = "RoutePlanner.TARGET_POSITION" delay="0" />
+	<connection  source = "SRGradient.SR_GRADIENT"  target = "RoutePlanner.SR_GRADIENT" delay="0" />
+	<connection  source = "SLAM.POSITION_INDEX"  target = "RoutePlanner.START_POSITION" delay="0" />
+
+	<view  name = "TransitionMatrix">
+		<!--Motor view-->
+		<button height = "25" width = "100" y = "45" x = "10" label="Left" title="Left" command="Controls.left" />
+		<button height = "25" width = "100" y = "45" x = "230" label="Right" title="Right" command="Controls.right" />
+		<button height = "25" width = "100" y = "10" x = "120" label="Forward" title="Forward" command="Controls.forward" />
+		<button height = "25" width = "100" y = "80" x = "120" label="Backward" title="Back" command="Controls.backward" />
+		<button height = "25" width = "100" y = "10" x = "10" label="Forward Left" title="Forward Left" command="Controls.forward_left" />
+		<button height = "25" width = "100" y = "10" x = "230" label="Forward Right" title="Forward Right" command="Controls.forward_right" />
+		<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
+		<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
+
+		<!--Sensing view-->
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "SLAM.OCCUPANCY_MAP" x = "10" y = "125" valueLow="0" valueHigh="1" command="SRGradient.set_position" />
+
+		<!--Navigation view-->
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "410" y = "125" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Route Planner" direction = "horizontal" source = "RoutePlanner.ROUTE" x = "810" y = "125" />
+	</view>
+
+</group>
+ 
