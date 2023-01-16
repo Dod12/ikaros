@@ -35,12 +35,7 @@ RaoBlackwellSLAM::Init()
 
     Bind(cell_size, "cell_size");
 
-    alpha1 = 0.1;
-    alpha2 = 0.1;
-    alpha3 = 0.1;
-    alpha4 = 0.1;
-    alpha5 = 0.1;
-    alpha6 = 0.1;
+    VelocityNoise vel_noise{0.1};
 
     Bind(z_hit, "z_hit");
     Bind(z_short, "z_short");
@@ -93,9 +88,9 @@ RaoBlackwellSLAM::Init()
     sensor.max_range = max_range;
 
     robot_location = Pose();
-    robot_location.x = 0;
-    robot_location.y = 0;
-    robot_location.angle = 0;
+    robot_location.x = occupancy_map_size_x * cell_size / 2.0f; // Center of map
+    robot_location.y = occupancy_map_size_y * cell_size / 2.0f;
+    robot_location.angle = M_PI_2; // Facing up
 
     particles.reserve(num_particles);
     new_particles.reserve(num_particles);
@@ -105,7 +100,7 @@ RaoBlackwellSLAM::Init()
     {
         maps.push_back(create_matrix(occupancy_map_size_x, occupancy_map_size_y));
         set_matrix(maps[i], occupancy_map_size_x, occupancy_map_size_y, l_0);
-        particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, alpha1, alpha2, sigma_hit, 0.4));
+        particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, vel_noise, sigma_hit, 0.4));
         weights.push_back(1 / num_particles);
     }
 
@@ -142,13 +137,18 @@ RaoBlackwellSLAM::Tick()
     heading[0] = robot_location.angle;
 
     // Resample
-    distribution = std::discrete_distribution<int>(weights.begin(), weights.end());
-    new_particles = std::move(particles);
-    particles.clear();
-    for (size_t i = 0; i < num_particles; i++)
+    float N_eff = 1 / std::accumulate(weights.begin(), weights.end(), 0.0f, [](float a, float b) { return a + b * b; });
+
+    if (N_eff < num_particles / 2)
     {
-        int index = distribution(generator);
-        particles.push_back(std::move(new_particles[index]));
+        distribution = std::discrete_distribution<int>(weights.begin(), weights.end());
+        new_particles = std::move(particles);
+        particles.clear();
+        for (size_t i = 0; i < num_particles; i++)
+        {
+            int index = distribution(generator);
+            particles.push_back(std::move(new_particles[index]));
+        }
     }
 }
 

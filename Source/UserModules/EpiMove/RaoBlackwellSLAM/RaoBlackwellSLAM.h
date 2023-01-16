@@ -54,6 +54,16 @@ struct Pose
     float angle;
 };
 
+struct VelocityNoise
+{
+    float alpha1;
+    float alpha2;
+    float alpha3;
+    float alpha4;
+    float alpha5;
+    float alpha6;
+};
+
 class Particle
 {
 public:
@@ -66,7 +76,7 @@ public:
 
     float weight;
 
-    Particle(float ** grid, float grid_size_x, float grid_size_y, float cell_size, Pose pose, float weight, LidarSensor sensor, float l_0, float l_occ, float l_free, float z_hit, float z_short, float z_max, float z_rand, float alpha, float beta, float sigma_hit, float lambda_short);
+    Particle(float ** grid, float grid_size_x, float grid_size_y, float cell_size, Pose pose, float weight, LidarSensor sensor, float l_0, float l_occ, float l_free, float z_hit, float z_short, float z_max, float z_rand, VelocityNoise vel_noise, float sigma_hit, float lambda_short);
 
     Particle operator=(const Particle& other);
 
@@ -92,8 +102,7 @@ private:
     float z_max = 0.05f;
     float z_rand = 0.05f;
 
-    float alpha = 0.1; // Velocity noise
-    float beta = 0.1;  // Angular velocity noise
+    VelocityNoise vel_noise; // Noise parameters for the velocity model
 
     float sigma_hit = 0.1; // Standard deviation of the Gaussian distribution for the hit model
     float lambda_short = 0.1; // Decay rate of the exponential distribution for the short model

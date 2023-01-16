@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<class name="FakeLidar" description="Lidar sensor module">
+
+	<description type="text">
+		Module for interacting with the RPLIDAR-A3 sensor.
+	</description>
+
+	<example description="A simple example">
+		<module
+			class="FakeLidar"
+			name="FakeLidar"
+		/>
+	</example>
+
+	<parameter name="num_points" description="Number of points to be returned by the lidar sensor" type="int" default="1024" />
+
+	<input name="POSITION" description="Position of the lidar sensor in space" size="2" />
+	<input name="HEADING" description="Orientation of the lidar sensor in space" size="1" />
+
+	<output name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor" size="8192" />
+	<output name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor" size="8192" />
+
+	<link class="FakeLidar" />
+
+	<author>
+		<name>Daniel Carlström Schad</name>
+		<email>daniel.c.schad@protonmail.com</email>
+		<affiliation>Lund University Cognitive Science</affiliation>
+	</author>
+
+   <files>
+   		<file>FakeLidar.h</file>
+   		<file>FakeLidar.cc</file>
+   		<file>FakeLidar.ikc</file>
+   </files>
+
+</class>

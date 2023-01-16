@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-Particle::Particle(float ** grid, float grid_size_x, float grid_size_y, float cell_size, Pose pose, float weight, LidarSensor sensor, float l_0, float l_occ, float l_free, float z_hit, float z_short, float z_max, float z_rand, float alpha, float beta, float sigma_hit, float lambda_short)
+Particle::Particle(float ** grid, float grid_size_x, float grid_size_y, float cell_size, Pose pose, float weight, LidarSensor sensor, float l_0, float l_occ, float l_free, float z_hit, float z_short, float z_max, float z_rand, VelocityNoise vel_noise, float sigma_hit, float lambda_short)
 {
     this->grid = grid;
     this->grid_size_x = grid_size_x;
@@ -19,8 +19,7 @@ Particle::Particle(float ** grid, float grid_size_x, float grid_size_y, float ce
     this->z_short = z_short;
     this->z_max = z_max;
     this->z_rand = z_rand;
-    this->alpha = alpha;
-    this->beta = beta;
+    this->vel_noise = vel_noise;
     this->sigma_hit = sigma_hit;
     this->lambda_short = lambda_short;
 }
@@ -41,8 +40,7 @@ Particle Particle::operator=(const Particle& other)
     this->z_short = other.z_short;
     this->z_max = other.z_max;
     this->z_rand = other.z_rand;
-    this->alpha = other.alpha;
-    this->beta = other.beta;
+    this->vel_noise = other.vel_noise;
     this->sigma_hit = other.sigma_hit;
     this->lambda_short = other.lambda_short;
     return *this;
@@ -51,10 +49,12 @@ Particle Particle::operator=(const Particle& other)
 // Samples the motion model and returns the new pose
 Pose& Particle::sample_motion_model(float d_t, float velocity, float omega, std::default_random_engine& generator)
 {   
-    std::normal_distribution distribution(0.0f, sqrt(alpha * velocity * velocity + beta * omega * omega));
-    float v_hat = velocity + distribution(generator);
-    float omega_hat = omega + distribution(generator);
-    float gamma_hat = distribution(generator);
+    std::normal_distribution vel_distribution(0.0f, vel_noise.alpha1 * velocity * velocity + vel_noise.alpha2 * omega * omega);
+    std::normal_distribution omega_distribution(0.0f, vel_noise.alpha3 * velocity * velocity + vel_noise.alpha4 * omega * omega);
+    std::normal_distribution gamma_distribution(0.0f, vel_noise.alpha5 * velocity * velocity + vel_noise.alpha6 * omega * omega);
+    float v_hat = velocity + vel_distribution(generator);
+    float omega_hat = omega + omega_distribution(generator);
+    float gamma_hat = gamma_distribution(generator);
 
     pose.x = pose.x + (v_hat / omega_hat) * (sin(pose.angle + omega_hat * d_t) - sin(pose.angle));
     pose.y = pose.y + (v_hat / omega_hat) * (cos(pose.angle) - cos(pose.angle + omega_hat * d_t));
