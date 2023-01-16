@@ -28,9 +28,9 @@
 		<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
 		<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
 
-		<grid width="600" height="600" show_title = "true" flipYAxis="true" flipYCanvas="no" title= "Measured gridmap state" direction = "horizontal" source = "GridMatrix.GRID_MATRIX" x = "100" y = "125" valueLow="0" valueHigh="1"/>
+		<grid width="600" height="600" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Measured gridmap state" direction = "horizontal" source = "GridMatrix.GRID_MATRIX" x = "100" y = "125" valueLow="0" valueHigh="1"/>
 
-		<grid width="600" height="600" show_title = "true" flipYAxis="true" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "SLAM.OCCUPANCY_MAP" x = "800" y = "125" valueLow="0" valueHigh="1" />
+		<grid width="600" height="600" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "SLAM.OCCUPANCY_MAP" x = "800" y = "125" valueLow="0" valueHigh="1" />
 	</view>
 
 	<module

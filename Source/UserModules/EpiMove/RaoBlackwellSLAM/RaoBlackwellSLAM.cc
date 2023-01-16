@@ -24,6 +24,17 @@
 
 using namespace ikaros;
 
+// Log odds helper functions
+float log_odds(float p)
+{
+    return log(p/(1-p));
+}
+
+float prob(float l)
+{
+    return 1/(1+exp(-l));
+}
+
 void
 RaoBlackwellSLAM::Init()
 {
@@ -85,6 +96,7 @@ RaoBlackwellSLAM::Init()
     // Output arrays
     io(heading, heading_size, "HEADING");
     io(position, position_size, "POSITION");
+    io(position_index, position_index_size, "POSITION_INDEX");
 
     io(occupancy_map, occupancy_map_size_x, occupancy_map_size_y, "OCCUPANCY_MAP");
 
@@ -122,7 +134,7 @@ RaoBlackwellSLAM::Tick()
     if (GetTick() == 0)
     {
         for (auto& particle : particles)
-            particle.update_map(r_array, theta_array, (int) n_samples[0]);
+            particle.update_map(r_array, theta_array, (int) n_samples[0], alpha);
     }
 
     // Calculate velocity and angular velocity
@@ -143,15 +155,20 @@ RaoBlackwellSLAM::Tick()
     {
         particle.sample_motion_model_odometry(dx, dy, wheelbase, generator);
         weights.push_back(particle.measurement_model(r_array, theta_array, (int) n_samples[0]));
-        particle.update_map(r_array, theta_array, (int) n_samples[0]);
+        particle.update_map(r_array, theta_array, (int) n_samples[0], alpha);
     }
 
     // Get best particle
     auto best_particle = std::max_element(particles.begin(), particles.end(), [](const Particle& a, const Particle& b) { return a.weight < b.weight; });
     robot_location = best_particle->pose;
     copy_matrix(occupancy_map, best_particle->grid, occupancy_map_size_x, occupancy_map_size_y);
+    for (size_t i = 0; i < occupancy_map_size_x; i++)
+        for (size_t j = 0; j < occupancy_map_size_y; j++)
+            occupancy_map[i][j] = prob(occupancy_map[i][j]);
     position[0] = robot_location.x;
     position[1] = robot_location.y;
+    position_index[0] = robot_location.x / cell_size;
+    position_index[1] = robot_location.y / cell_size;
     heading[0] = robot_location.angle;
 
     // Resample

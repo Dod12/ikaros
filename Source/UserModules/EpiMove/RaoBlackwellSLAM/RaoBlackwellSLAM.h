@@ -27,18 +27,6 @@
 #include <random>
 #include "IKAROS.h"
 
-// Log odds helper functions
-template <typename T>
-static constexpr T log_odds(T p)
-{
-    return log(p/(1-p));
-}
-
-template <typename T>
-static constexpr T prob(T l)
-{
-    return 1/(1+exp(-l));
-}
 
 struct LidarSensor
 {
@@ -98,7 +86,7 @@ public:
     float measurement_model(float * r_array, float * theta_array, int array_size);
 
     // Iterate over scan beams and update grid cells
-    void update_map(float * r_array, float * theta_array, int array_size);
+    void update_map(float * r_array, float * theta_array, int array_size, float alpha = 0.1f);
 
 private:
 
@@ -211,6 +199,9 @@ public:
 
     float * position;
     int position_size;
+
+    float * position_index;
+    int position_index_size;
 
 private:
 };

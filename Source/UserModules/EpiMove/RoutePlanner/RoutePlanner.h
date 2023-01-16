@@ -37,7 +37,6 @@ public:
     void        SetSizes();
     void 		Init();
     void 		Tick();
-    void        Command(std::string s, float x, float y, std::string value);
 
     // Robot position
     int start_pos_x;
@@ -51,6 +50,9 @@ public:
 
     float * target_position;
     int target_position_size_x;
+
+    float * start_position;
+    int start_position_size_x;
 
     // Output arrays
 

@@ -61,7 +61,13 @@ SuccessorRepresentation::Tick()
 
     subtract(intermediate, identity, intermediate, transition_matrix_size_x, transition_matrix_size_y);
 
+    // Calculate gradient of successor representation
     pinv(successor_representation, intermediate, transition_matrix_size_x, transition_matrix_size_y);
+    /*
+    bool res = inv(successor_representation, intermediate, transition_matrix_size_x);
+    if (!res)
+        Notify(msg_fatal_error, "SuccessorRepresentation: Could not invert matrix");
+    */
 }
 
 void SuccessorRepresentation::Command(std::string s, float x, float y, std::string value){

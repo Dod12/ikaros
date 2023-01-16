@@ -38,12 +38,10 @@ RoutePlanner::Init()
     // Get input arrays
     io(sr_gradient, sr_gradient_size_x, sr_gradient_size_y, "SR_GRADIENT");
     io(target_position, target_position_size_x, "TARGET_POSITION");
+    io(start_position, start_position_size_x, "START_POSITION");
 
     // Set output matrix
     io(route, route_size_x, route_size_y, "ROUTE");
-
-    start_pos_x = sr_gradient_size_x / 2;
-    start_pos_y = sr_gradient_size_y / 2;
 }
 
 void
@@ -51,8 +49,8 @@ RoutePlanner::Tick()
 {   
     set_matrix(route, 0, route_size_x, route_size_y);
 
-    int pos_x = start_pos_x;
-    int pos_y = start_pos_y;
+    int pos_x = start_position[1];
+    int pos_y = start_position[0];
 
     int counter = 0;
 
@@ -83,14 +81,6 @@ RoutePlanner::Tick()
         pos_x += max_x;
         pos_y += max_y;
         ++counter;
-    }
-}
-
-void RoutePlanner::Command(std::string s, float x, float y, std::string value)
-{
-    if (s == "set_position") {
-        start_pos_x = (int) x;
-        start_pos_y = (int) y;
     }
 }
 

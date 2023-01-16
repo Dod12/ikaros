@@ -41,6 +41,7 @@
 	<output name="OCCUPANCY_MAP" description="Matrix of expected occupied cells in the grid" size_param_x="output_size" size_param_y="output_size" />
 	<output name="HEADING" description="Heading of the robot in radians" size = "1" />
 	<output name="POSITION" description="Position of the robot in meters" size = "2" />
+	<output name="POSITION_INDEX" description="Position of the robot in grid cells" size = "2" />
 
 	<link class="RaoBlackwellSLAM" />
 

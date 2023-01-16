@@ -72,17 +72,19 @@ Pose& Particle::sample_motion_model_velocity(float d_t, float velocity, float om
 // Samples the motion model and returns the new pose based on distance travelled
 Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelbase, std::default_random_engine& generator)
 {
-    if (d_l == d_r) // Robot is moving straight
-    {
-        pose.x += d_l * cos(pose.angle);
-        pose.y += d_l * sin(pose.angle);
+    double eps = 1e-4;
+    if (abs(d_l - d_r) < eps) // Robot is moving straight
+    {   
+        float d = (d_l + d_r) / 2;
+        pose.x += d * cos(pose.angle);
+        pose.y += d * sin(pose.angle);
         return pose;
-    } else if (d_l < 1e-5 && d_r < 1e-5) // Avoid division by zero
+    } else if (d_l < eps && d_r < eps) // Avoid division by zero
     {
         return pose;
     }
-    std::normal_distribution l_distribution(0.0f, vel_noise.alpha1 * d_l * d_l + vel_noise.alpha2 * d_r * d_r);
-    std::normal_distribution r_distribution(0.0f, vel_noise.alpha3 * d_l * d_l + vel_noise.alpha4 * d_r * d_r);
+    std::normal_distribution l_distribution(0.0f, sqrt(vel_noise.alpha1 * d_l * d_l + vel_noise.alpha2 * d_r * d_r));
+    std::normal_distribution r_distribution(0.0f, sqrt(vel_noise.alpha3 * d_l * d_l + vel_noise.alpha4 * d_r * d_r));
     float d_l_hat = d_l + l_distribution(generator);
     float d_r_hat = d_r + r_distribution(generator);
 
@@ -101,8 +103,6 @@ Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelba
         pose.x = new_x;
         pose.y = new_y;
         pose.angle = new_angle;
-    } else {
-        int a = 0;
     }
 
     return pose;
@@ -124,8 +124,8 @@ float Particle::measurement_model(float * r_array, float * theta_array, int arra
 // Ray cast on the map to find the "true" distanace to the obstacle in the direction of the Lidar beam
 float Particle::ray_cast(float angle)
 {
-    float x = pose.x + sensor.x_offset;
-    float y = pose.y + sensor.y_offset;
+    float x = pose.x + sensor.x_offset * cos(pose.angle) - sensor.y_offset * sin(pose.angle);
+    float y = pose.y + sensor.x_offset * sin(pose.angle) + sensor.y_offset * cos(pose.angle);
     angle = pose.angle + sensor.angle_offset - angle;
 
     float x_step = cell_size * cos(angle);
@@ -143,7 +143,7 @@ float Particle::ray_cast(float angle)
         dist += cell_size;
         if (x_index < 0 || x_index >= grid_size_x || y_index < 0 || y_index >= grid_size_y)
             return sensor.max_range;
-        else if (grid[x_index][y_index] > l_occ)
+        else if (grid[x_index][y_index] < l_occ)
             return dist;
     }
     return sensor.max_range;
@@ -176,14 +176,12 @@ float Particle::prob_rand(float z_star, float z)
 }
 
 // Iterate over scan beams and update grid cells
-void Particle::update_map(float * r_array, float * theta_array, int array_size)
+void Particle::update_map(float * r_array, float * theta_array, int array_size, float alpha)
 {
     for (int i = 0; i < array_size; ++i)
-    {   
-        float alpha = 0.1f; // Assume 10 cm thickness of walls
-
-        float x = pose.x + sensor.x_offset;
-        float y = pose.y + sensor.y_offset;
+    {
+        float x = pose.x + sensor.x_offset * cos(pose.angle) - sensor.y_offset * sin(pose.angle);
+        float y = pose.y + sensor.x_offset * sin(pose.angle) + sensor.y_offset * cos(pose.angle);
         float angle = pose.angle + sensor.angle_offset - theta_array[i];
 
         float x_step = cell_size * cos(angle);
