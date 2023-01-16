@@ -38,9 +38,16 @@ LidarSensor::Init()
     io(r_array, r_array_size, "R_ARRAY");
     io(theta_array, theta_array_size, "THETA_ARRAY");
 
-    ///  Create a communication channel instance
+    io(n_samples, n_samples_size, "N_SAMPLES");
+    
+    // Check that the arrays are of the same size
+    if (theta_array_size != r_array_size)
+        Notify(msg_fatal_error, "R_ARRAY and THETA_ARRAY must be of the same size");
+
+    //  Create a communication channel instance
     channel = createSerialPortChannel(serial_port, baud_rate);
 
+    //  Create a driver instance
     driver = *createLidarDriver();
     auto res = driver->connect(*channel);
     if (SL_IS_OK(res)) {
@@ -59,9 +66,9 @@ LidarSensor::Init()
     } else {
         fprintf(stderr, "Failed to connect to LIDAR %08x\r\n", res);
     }
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    std::this_thread::sleep_for(std::chrono::milliseconds(2500));
     res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     if (SL_IS_OK(res)) {
         std::thread poller_thread(&LidarSensor::poller, this, 125);
         poller_thread.detach();
@@ -74,22 +81,23 @@ LidarSensor::Init()
 void
 LidarSensor::Tick()
 {
-
+    // Do nothing
 }
 
 void LidarSensor::poller(int sleep_millis)
 {
-    while (get_poller()) {
-        res = driver->grabScanDataHq(measurements, measurements_array_size, 0);
-        if (SL_IS_OK(res)) {
-            if (r_array_size != theta_array_size) { Notify(msg_warning, "R_ARRAY and THETA_ARRAY must be of same size"); }
-            
-            for (int i = 0; i < r_array_size; ++i) {
+    while (get_poller())
+    {
+        measurements_array_size = N_SAMPLES; // Reset the array size to the maximum for each iteration
+        res = driver->grabScanDataHq(measurements, measurements_array_size, sleep_millis / 2);
+        if (SL_IS_OK(res)) {            
+            n_samples[0] = measurements_array_size;
+            for (int i = 0; i < measurements_array_size; ++i) {
                 theta_array[i] = ((float) measurements[i].angle_z_q14 * 90.f / (1 << 14)) * 2 * M_PI / 360;
                 r_array[i] = (float) measurements[i].dist_mm_q2 / 1000.f / (1 << 2);
             }
         } else {
-            fprintf(stderr, "Error while retrieving scan data: %i\r\n", res);
+            Notify(msg_warning, "Error while retrieving scan data: %i\r\n", res);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_millis));
     }
@@ -111,6 +119,7 @@ bool LidarSensor::get_poller() {
 
 LidarSensor::~LidarSensor()
 {
+    stop_poller();
     driver->stop();
     delete driver;
     delete *channel;

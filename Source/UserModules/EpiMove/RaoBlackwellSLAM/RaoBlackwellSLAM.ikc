@@ -15,15 +15,15 @@
 
 	<parameter name="wheelbase" default="0.355" type="float" description="Robot wheelbase" />
 	<parameter name="num_particles" default="50" type="int" description="Number of particles to use in the Rao-Blackwell filter" />
-	<parameter name="cell_size" default="0.25" type="float" description="Size of each cell in the occupancy grid in meters" />
+	<parameter name="max_distance" default="0.25" type="float" description="Maximum size of the occupancy grid in meters" />
 	<parameter name="z_hit" default="0.8" type="float" description="Probability of a hit" />
 	<parameter name="z_short" default="0.05" type="float" description="Probability of a short reading" />
 	<parameter name="z_max" default="0.05" type="float" description="Probability of a maximum reading" />
 	<parameter name="z_rand" default="0.1" type="float" description="Probability of a random reading" />
 	<parameter name="sigma_hit" default="0.2" type="float" description="Standard deviation of the Gaussian distribution for the hit model" />
 	<parameter name="p_unknown" default="0.5" type="float" description="Probability of an unknown cell being occupied" />
-	<parameter name="p_occupied" default="0.9" type="float" description="Probability of an occupied cell being occupied" />
-	<parameter name="p_free" default="0.1" type="float" description="Probability of a free cell being occupied" />
+	<parameter name="p_occupied" default="0.25" type="float" description="Probability of an occupied cell being occupied" />
+	<parameter name="p_free" default="0.85" type="float" description="Probability of a free cell being occupied" />
 	<parameter name="alpha" default="0.25" type="float" description="Thickness of obstacles in meters" />
 	<parameter name="beta" default="0.087" type="float" description="Beam width in radians" />
 	<parameter name="lidar_max_range" default="25" type="float" description="Maximum range of the lidar sensor in meters" />
@@ -36,6 +36,7 @@
 	<input name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor"/>
 	<input name="POS_ESTIM" description="Estimated position of left and right weel in meters" size = "2" />
 	<input name="VEL_ESTIM" description="Estimated velocity of left and right weel in meters per second" size = "2" />
+	<input name="N_SAMPLES" description="Number of samples in the R_ARRAY and THETA_ARRAY" size = "1" />
 
 	<output name="OCCUPANCY_MAP" description="Matrix of expected occupied cells in the grid" size_param_x="output_size" size_param_y="output_size" />
 	<output name="HEADING" description="Heading of the robot in radians" size = "1" />

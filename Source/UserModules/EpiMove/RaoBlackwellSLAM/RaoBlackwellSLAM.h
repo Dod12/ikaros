@@ -64,6 +64,14 @@ struct VelocityNoise
     float alpha6;
 };
 
+struct OdometryNoise
+{
+    float alpha1;
+    float alpha2;
+    float alpha3;
+    float alpha4;
+};
+
 class Particle
 {
 public:
@@ -81,7 +89,10 @@ public:
     Particle operator=(const Particle& other);
 
     // Samples the motion model and returns the new pose
-    Pose& sample_motion_model(float d_t, float velocity, float omega, std::default_random_engine& generator);
+    Pose& sample_motion_model_velocity(float d_t, float velocity, float omega, std::default_random_engine& generator);
+
+    // Samples the motion model and returns the new pose based on the odometry
+    Pose& sample_motion_model_odometry(float d_x, float d_y, float wheelbase, std::default_random_engine& generator);
 
     // Calculates probability of current Lidar scan given the current pose and the old map
     float measurement_model(float * r_array, float * theta_array, int array_size);
@@ -165,8 +176,13 @@ public:
     float * theta_array;
     int theta_array_size;
 
+    float * n_samples;
+    int n_samples_size = 1;
+
     float * pos_estim;
     int pos_estim_size;
+
+    float * prev_pos_estim;
 
     float * vel_estim;
     int vel_estim_size;

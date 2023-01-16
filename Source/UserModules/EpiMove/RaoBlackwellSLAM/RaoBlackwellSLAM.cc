@@ -33,9 +33,15 @@ RaoBlackwellSLAM::Init()
     Bind(num_particles_int, "num_particles");
     num_particles = (size_t) num_particles_int;
 
-    Bind(cell_size, "cell_size");
+    float max_distance;
+    int output_size;
+    Bind(max_distance, "max_distance");
+    Bind(output_size, "output_size");
+    cell_size = max_distance / output_size * 2.0f;
 
     VelocityNoise vel_noise{0.1};
+
+    OdometryNoise odometry_noise{0.1};
 
     Bind(z_hit, "z_hit");
     Bind(z_short, "z_short");
@@ -69,9 +75,12 @@ RaoBlackwellSLAM::Init()
 
     io(r_array, r_array_size, "R_ARRAY");
     io(theta_array, theta_array_size, "THETA_ARRAY");
+    io(n_samples, n_samples_size, "N_SAMPLES");
 
     io(pos_estim, pos_estim_size, "POS_ESTIM");
     io(vel_estim, vel_estim_size, "VEL_ESTIM");
+
+    prev_pos_estim = create_array(pos_estim_size);
 
     // Output arrays
     io(heading, heading_size, "HEADING");
@@ -88,9 +97,9 @@ RaoBlackwellSLAM::Init()
     sensor.max_range = max_range;
 
     robot_location = Pose();
-    robot_location.x = occupancy_map_size_x * cell_size / 2.0f; // Center of map
-    robot_location.y = occupancy_map_size_y * cell_size / 2.0f;
-    robot_location.angle = M_PI_2; // Facing up
+    robot_location.x = output_size * cell_size / 2.0f; // Center of map
+    robot_location.y = output_size * cell_size / 2.0f;
+    robot_location.angle = M_PI; // Facing up
 
     particles.reserve(num_particles);
     new_particles.reserve(num_particles);
@@ -98,7 +107,8 @@ RaoBlackwellSLAM::Init()
 
     for (size_t i = 0; i < num_particles; i++)
     {
-        maps.push_back(create_matrix(occupancy_map_size_x, occupancy_map_size_y));
+        float ** map = create_matrix(occupancy_map_size_x, occupancy_map_size_y);
+        maps.emplace_back(std::move(map));
         set_matrix(maps[i], occupancy_map_size_x, occupancy_map_size_y, l_0);
         particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, vel_noise, sigma_hit, 0.4));
         weights.push_back(1 / num_particles);
@@ -112,20 +122,28 @@ RaoBlackwellSLAM::Tick()
     if (GetTick() == 0)
     {
         for (auto& particle : particles)
-            particle.update_map(r_array, theta_array, r_array_size);
+            particle.update_map(r_array, theta_array, (int) n_samples[0]);
     }
 
-    float velocity = (vel_estim[0] + vel_estim[1]) / 2;
+    // Calculate velocity and angular velocity
+    float velocity = (vel_estim[0] + vel_estim[1]) / 2.0f;
     float omega = (vel_estim[1] - vel_estim[0]) / wheelbase;
+
+    // Calculate distance travelled on each axis since last tick
+    float dx = pos_estim[0] - prev_pos_estim[0];
+    float dy = pos_estim[1] - prev_pos_estim[1];
+
+    // Update previous position
+    copy_array(prev_pos_estim, pos_estim, pos_estim_size);
 
     weights.clear();
 
     // Loop through all particles and update their location and map
     for (auto& particle : particles)
     {
-        particle.sample_motion_model(GetTickLength(), velocity, omega, generator);
-        weights.push_back(particle.measurement_model(r_array, theta_array, r_array_size));
-        particle.update_map(r_array, theta_array, r_array_size);
+        particle.sample_motion_model_odometry(dx, dy, wheelbase, generator);
+        weights.push_back(particle.measurement_model(r_array, theta_array, (int) n_samples[0]));
+        particle.update_map(r_array, theta_array, (int) n_samples[0]);
     }
 
     // Get best particle

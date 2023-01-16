@@ -157,6 +157,7 @@ ODriveController::Tick()
 
 ODriveController::~ODriveController()
 {
+    odrive->SetState(AXIS_STATE_IDLE);
     delete odrive;
 }
 

@@ -28,8 +28,9 @@
 		<button height = "25" width = "100" y = "80" x = "10" label="Backward Left" title="Backward Left" command="Controls.backward_left" />
 		<button height = "25" width = "100" y = "80" x = "230" label="Backward Right" title="Backward Right" command="Controls.backward_right" />
 
-		<grid width="600" height="600" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "SLAM.OCCUPANCY_MAP" x = "800" y = "125" valueLow="0" valueHigh="1" />
-		<grid width="600" height="600" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Measured gridmap state" direction = "horizontal" source = "GridMatrix.GRID_MATRIX" x = "100" y = "125" valueLow="0" valueHigh="1"/>
+		<grid width="600" height="600" show_title = "true" flipYAxis="true" flipYCanvas="no" title= "Measured gridmap state" direction = "horizontal" source = "GridMatrix.GRID_MATRIX" x = "100" y = "125" valueLow="0" valueHigh="1"/>
+
+		<grid width="600" height="600" show_title = "true" flipYAxis="true" flipYCanvas="no" title= "Expected gridmap state" direction = "horizontal" source = "SLAM.OCCUPANCY_MAP" x = "800" y = "125" valueLow="0" valueHigh="1" />
 	</view>
 
 	<module
@@ -42,22 +43,23 @@
 	<module
 		class = "GridMatrix"
 		name = "GridMatrix"
-		output_size = "50"
-		max_distance = "6"
+		output_size = "125"
+		max_distance = "5"
 	/>
 
 	<module
 		class = "RaoBlackwellSLAM"
 		name = "SLAM"
-		output_size = "50"
-		cell_size = "0.12"
-		num_particles = "10"
+		output_size = "125"
+		max_distance = "5"
+		num_particles = "20"
 	/>
 
-	<connection source="LidarSensor.R_ARRAY" target="SLAM.R_ARRAY" delay="0" />
-	<connection source="LidarSensor.THETA_ARRAY" target="SLAM.THETA_ARRAY" delay="0" />
 	<connection source="LidarSensor.R_ARRAY" target="GridMatrix.R_ARRAY" delay="0" />
 	<connection source="LidarSensor.THETA_ARRAY" target="GridMatrix.THETA_ARRAY" delay="0" />
+	<connection source="LidarSensor.R_ARRAY" target="SLAM.R_ARRAY" delay="0" />
+	<connection source="LidarSensor.THETA_ARRAY" target="SLAM.THETA_ARRAY" delay="0" />
+	<connection source="LidarSensor.N_SAMPLES" target="SLAM.N_SAMPLES" delay="0" />
 	<connection source="Controller.POS_ESTIM" target="SLAM.POS_ESTIM" delay="0" />
 	<connection source="Controller.VEL_ESTIM" target="SLAM.VEL_ESTIM" delay="0" />
 </group>

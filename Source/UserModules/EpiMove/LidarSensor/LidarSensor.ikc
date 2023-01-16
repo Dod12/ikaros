@@ -20,6 +20,7 @@
 
 	<output name="R_ARRAY" description="Array of radii of objects detected by the lidar sensor" size="8192" />
 	<output name="THETA_ARRAY" description="Array of angles of objects detected by the lidar sensor" size="8192" />
+	<output name="N_SAMPLES" description="Number of samples detected by the lidar sensor" size="1" />
 
 	<link class="LidarSensor" />
 

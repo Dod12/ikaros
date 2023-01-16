@@ -30,9 +30,9 @@
 #include "sl_lidar.h"
 #include "sl_lidar_driver.h"
 
-#define N_LIDAR_SAMPLES 8192
-
 using namespace sl;
+
+#define N_SAMPLES 8192
 
 class LidarSensor: public Module
 {
@@ -53,6 +53,9 @@ public:
     float * theta_array;
     int theta_array_size;
 
+    float * n_samples;
+    int n_samples_size = 1;
+
     // Parameters
 
     int baud_rate;
@@ -65,8 +68,8 @@ private:
     Result<IChannel*> channel = Result<IChannel*>(nullptr);
     ILidarDriver* driver;
     sl_result res;
-    sl_lidar_response_measurement_node_hq_t measurements[N_LIDAR_SAMPLES];
-    size_t measurements_array_size = N_LIDAR_SAMPLES;
+    sl_lidar_response_measurement_node_hq_t measurements[N_SAMPLES];
+    size_t measurements_array_size = N_SAMPLES;
 
     std::thread poller_thread;
     std::mutex poller_mutex;
