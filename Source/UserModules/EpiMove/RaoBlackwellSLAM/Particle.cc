@@ -77,28 +77,38 @@ Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelba
     double d_l_hat = d_l + l_distribution(generator);
     double d_r_hat = d_r + r_distribution(generator);
 
-    static const double eps = 1e-4; // Epsilon to avoid division by zero
+    static const double eps = 1e-5; // Epsilon to avoid division by zero
 
-    if (abs(d_l_hat - d_r_hat) < eps) // If the robot is moving straight
+    if (abs(d_l_hat) < eps && abs(d_r_hat) < eps) // If the robot is not moving
+    {
+        return pose;
+    } 
+    else if (abs(d_l_hat - d_r_hat) < eps) // If the robot is moving straight
     {
         float d_s = (d_l_hat + d_r_hat) / 2;
         pose.x += d_s * cos(pose.angle);
         pose.y += d_s * sin(pose.angle);
 
-    } else if (abs(d_l_hat + d_l_hat) < eps) // If the robot is rotating in place
+        return pose;
+    } 
+    else if (abs(d_l_hat + d_l_hat) < eps) // If the robot is rotating in place
     {
         float d_theta = (d_r_hat - d_l_hat) / wheelbase;
         pose.angle += d_theta;
+
+        return pose;
+    } 
+    else // If the robot is moving in an arc
+    {
+        double r = (wheelbase * (d_l_hat + d_r_hat)) / (2 * (d_r_hat - d_l_hat));
+        double d_theta = (d_r_hat - d_l_hat) / wheelbase;
+
+        pose.x += r * (-sin(pose.angle) + sin(pose.angle + d_theta));
+        pose.y += r * (cos(pose.angle) - cos(pose.angle + d_theta));
+        pose.angle += d_theta;
+
+        return pose;
     }
-
-    double r = (wheelbase * (d_l_hat + d_r_hat)) / (2 * (d_r_hat - d_l_hat));
-    double d_theta = (d_r_hat - d_l_hat) / wheelbase;
-
-    pose.x += r * (-sin(pose.angle) + sin(pose.angle + d_theta));
-    pose.y += r * (cos(pose.angle) - cos(pose.angle + d_theta));
-    pose.angle += d_theta;
-
-    return pose;
 }
 
 // Calculates probability of current Lidar scan given the current pose and the old map

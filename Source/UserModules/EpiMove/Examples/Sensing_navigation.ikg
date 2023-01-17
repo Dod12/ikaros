@@ -22,7 +22,7 @@
 	<module class = "TransitionMatrix" name = "Transition" _x = "500" _y = "50" />
 	<module class="SuccessorRepresentation" name="SR" gamma="0.98" _x="650" _y="50" />
 	<module class="SRGradient" name="SRGradient" _x="800" _y="50" />
-	<module class="RoutePlanner" name="RoutePlanner" _x="950" _y="50" />
+	<module class="RoutePlanner" name="RoutePlanner" _x="950" _y="100" />
 
 	<connection  source = "SLAM.OCCUPANCY_MAP"  target = "Transition.OBSTACLE_GRID" delay="0" />
 	<connection  source = "Transition.TRANSITION_MATRIX"  target = "SR.TRANSITION_MATRIX" delay="1" />
