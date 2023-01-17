@@ -72,38 +72,31 @@ Pose& Particle::sample_motion_model_velocity(float d_t, float velocity, float om
 // Samples the motion model and returns the new pose based on distance travelled
 Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelbase, std::default_random_engine& generator)
 {
-    double eps = 1e-4;
-    if (abs(d_l - d_r) < eps) // Robot is moving straight
-    {   
-        float d = (d_l + d_r) / 2;
-        pose.x += d * cos(pose.angle);
-        pose.y += d * sin(pose.angle);
-        return pose;
-    } else if (d_l < eps && d_r < eps) // Avoid division by zero
+    std::normal_distribution<double> l_distribution(0.0f, vel_noise.alpha1 * d_l * d_l + vel_noise.alpha2 * d_r * d_r);
+    std::normal_distribution<double> r_distribution(0.0f, vel_noise.alpha3 * d_l * d_l + vel_noise.alpha4 * d_r * d_r);
+    double d_l_hat = d_l + l_distribution(generator);
+    double d_r_hat = d_r + r_distribution(generator);
+
+    static const double eps = 1e-4; // Epsilon to avoid division by zero
+
+    if (abs(d_l_hat - d_r_hat) < eps) // If the robot is moving straight
     {
-        return pose;
-    }
-    std::normal_distribution l_distribution(0.0f, sqrt(vel_noise.alpha1 * d_l * d_l + vel_noise.alpha2 * d_r * d_r));
-    std::normal_distribution r_distribution(0.0f, sqrt(vel_noise.alpha3 * d_l * d_l + vel_noise.alpha4 * d_r * d_r));
-    float d_l_hat = d_l + l_distribution(generator);
-    float d_r_hat = d_r + r_distribution(generator);
+        float d_s = (d_l_hat + d_r_hat) / 2;
+        pose.x += d_s * cos(pose.angle);
+        pose.y += d_s * sin(pose.angle);
 
-    float r = (wheelbase * (d_l_hat + d_r_hat)) / (2 * (d_r_hat - d_l_hat));
-    float d_theta = (d_r_hat - d_l_hat) / wheelbase;
-
-    float icc_x = pose.x - r * sin(pose.angle);
-    float icc_y = pose.y + r * cos(pose.angle);
-
-    float new_x = icc_x + (pose.x - icc_x) * cos(d_theta) - (pose.y - icc_y) * sin(d_theta);
-    float new_y = icc_y + (pose.x - icc_x) * sin(d_theta) + (pose.y - icc_y) * cos(d_theta);
-    float new_angle = pose.angle + d_theta;
-
-    if (!isnan(new_x) && !isnan(new_y) && !isnan(new_angle))
+    } else if (abs(d_l_hat + d_l_hat) < eps) // If the robot is rotating in place
     {
-        pose.x = new_x;
-        pose.y = new_y;
-        pose.angle = new_angle;
+        float d_theta = (d_r_hat - d_l_hat) / wheelbase;
+        pose.angle += d_theta;
     }
+
+    double r = (wheelbase * (d_l_hat + d_r_hat)) / (2 * (d_r_hat - d_l_hat));
+    double d_theta = (d_r_hat - d_l_hat) / wheelbase;
+
+    pose.x += r * (-sin(pose.angle) + sin(pose.angle + d_theta));
+    pose.y += r * (cos(pose.angle) - cos(pose.angle + d_theta));
+    pose.angle += d_theta;
 
     return pose;
 }
