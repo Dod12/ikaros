@@ -16,11 +16,12 @@
 	<parameter name="wheelbase" default="0.355" type="float" description="Robot wheelbase" />
 	<parameter name="num_particles" default="50" type="int" description="Number of particles to use in the Rao-Blackwell filter" />
 	<parameter name="max_distance" default="0.25" type="float" description="Maximum size of the occupancy grid in meters" />
-	<parameter name="z_hit" default="0.8" type="float" description="Probability of a hit" />
-	<parameter name="z_short" default="0.05" type="float" description="Probability of a short reading" />
-	<parameter name="z_max" default="0.05" type="float" description="Probability of a maximum reading" />
-	<parameter name="z_rand" default="0.1" type="float" description="Probability of a random reading" />
-	<parameter name="sigma_hit" default="0.2" type="float" description="Standard deviation of the Gaussian distribution for the hit model" />
+	<parameter name="z_hit" default="0.5" type="float" description="Probability of a hit" />
+	<parameter name="z_short" default="0.2" type="float" description="Probability of a short reading" />
+	<parameter name="z_max" default="0.1" type="float" description="Probability of a maximum reading" />
+	<parameter name="z_rand" default="0.2" type="float" description="Probability of a random reading" />
+	<parameter name="sigma_hit" default="0.1" type="float" description="Standard deviation of the Gaussian distribution for the hit model" />
+	<parameter name="lambda_short" default="0.5" type="float" description="Parameter of the exponential distribution for the short model" />
 	<parameter name="p_unknown" default="0.5" type="float" description="Probability of an unknown cell being occupied" />
 	<parameter name="p_occupied" default="0.25" type="float" description="Probability of an occupied cell being occupied" />
 	<parameter name="p_free" default="0.85" type="float" description="Probability of a free cell being occupied" />

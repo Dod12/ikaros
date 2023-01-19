@@ -86,7 +86,8 @@ public:
     float measurement_model(float * r_array, float * theta_array, int array_size);
 
     // Iterate over scan beams and update grid cells
-    void update_map(float * r_array, float * theta_array, int array_size, float alpha = 0.1f);
+    void update_map_raycasting(float * r_array, float * theta_array, int array_size, float alpha = 0.1f);
+    void update_map_beam_model(float * r_array, float * theta_array, int array_size, float alpha = 0.1f, float beta = 0.05f);
 
 private:
 
@@ -104,7 +105,7 @@ private:
     VelocityNoise vel_noise; // Noise parameters for the velocity model
 
     float sigma_hit = 0.1; // Standard deviation of the Gaussian distribution for the hit model
-    float lambda_short = 0.1; // Decay rate of the exponential distribution for the short model
+    float lambda_short = 0.5; // Decay rate of the exponential distribution for the short model
 
     // Ray cast on the map to find the "true" distanace to the obstacle in the direction of the Lidar beam
     float ray_cast(float angle);
@@ -148,6 +149,7 @@ public:
     float z_rand;
     
     float sigma_hit;
+    float lambda_short;
 
     float l_0;
     float l_occupied;

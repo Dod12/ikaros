@@ -60,6 +60,7 @@ RaoBlackwellSLAM::Init()
     Bind(z_rand, "z_rand");
 
     Bind(sigma_hit, "sigma_hit");
+    Bind(lambda_short, "lambda_short");
 
     float prob_0, prob_occupied, prob_free;
     Bind(prob_0, "p_unknown");
@@ -122,7 +123,7 @@ RaoBlackwellSLAM::Init()
         float ** map = create_matrix(occupancy_map_size_x, occupancy_map_size_y);
         maps.emplace_back(std::move(map));
         set_matrix(maps[i], occupancy_map_size_x, occupancy_map_size_y, l_0);
-        particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, vel_noise, sigma_hit, 0.4));
+        particles.push_back(Particle(maps[i], occupancy_map_size_x, occupancy_map_size_y, cell_size, robot_location, 1 / num_particles, sensor, l_0, l_occupied, l_free, z_hit, z_short, z_max, z_rand, vel_noise, sigma_hit, lambda_short));
         weights.push_back(1 / num_particles);
     }
 
@@ -134,7 +135,7 @@ RaoBlackwellSLAM::Tick()
     if (GetTick() == 0)
     {
         for (auto& particle : particles)
-            particle.update_map(r_array, theta_array, (int) n_samples[0], alpha);
+            particle.update_map_beam_model(r_array, theta_array, (int) n_samples[0], alpha, beta);
     }
 
     // Calculate velocity and angular velocity
@@ -155,7 +156,7 @@ RaoBlackwellSLAM::Tick()
     {
         particle.sample_motion_model_odometry(dx, dy, wheelbase, generator);
         weights.push_back(particle.measurement_model(r_array, theta_array, (int) n_samples[0]));
-        particle.update_map(r_array, theta_array, (int) n_samples[0], alpha);
+        particle.update_map_beam_model(r_array, theta_array, (int) n_samples[0], alpha, beta);
     }
 
     // Get best particle
