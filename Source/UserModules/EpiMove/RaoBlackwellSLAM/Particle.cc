@@ -88,14 +88,12 @@ Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelba
         float d_s = (d_l_hat + d_r_hat) / 2;
         pose.x += d_s * cos(pose.angle);
         pose.y += d_s * sin(pose.angle);
-
         return pose;
     } 
     else if (abs(d_l_hat + d_l_hat) < eps) // If the robot is rotating in place
     {
         float d_theta = (d_r_hat - d_l_hat) / wheelbase;
         pose.angle += d_theta;
-
         return pose;
     } 
     else // If the robot is moving in an arc
@@ -106,7 +104,6 @@ Pose& Particle::sample_motion_model_odometry(float d_l, float d_r, float wheelba
         pose.x += r * (-sin(pose.angle) + sin(pose.angle + d_theta));
         pose.y += r * (cos(pose.angle) - cos(pose.angle + d_theta));
         pose.angle += d_theta;
-
         return pose;
     }
 }
@@ -124,7 +121,7 @@ float Particle::measurement_model(float * r_array, float * theta_array, int arra
     return weight;
 }
 
-// Ray cast on the map to find the "true" distanace to the obstacle in the direction of the Lidar beam
+// Ray cast on the map to find the "true" distance to the obstacle in the direction of the Lidar beam
 float Particle::ray_cast(float angle)
 {
     float x = pose.x + sensor.x_offset * cos(pose.angle) - sensor.y_offset * sin(pose.angle);
@@ -156,7 +153,10 @@ float Particle::prob_hit(float z_star, float z)
 {
     // Normal distribution with mean z_star and standard deviation sigma_hit: return exp(-1.0f/2.0f * pow((z - z_star) / sigma_hit, 2))/sqrt(2 * M_PI * pow(sigma_hit, 2));
     // Normal distribution with mean z_star and standard deviation sigma_hit, normalized on the interval [0, sensor.max_range]
-    return (sqrt(2 / M_PI) * exp(-pow(z - z_star, 2) / (2 * pow(sigma_hit, 2)))) / sigma_hit * (erf(z_star/sqrt(2) * sigma_hit) - erf(z_star - sensor.max_range / (sqrt(2) * sigma_hit)));
+    if (0 <= z_star && z_star <= sensor.max_range)
+        return (sqrt(2 / M_PI) * exp(-pow(z - z_star, 2) / (2 * pow(sigma_hit, 2)))) / sigma_hit * (erf(z_star/sqrt(2) * sigma_hit) - erf(z_star - sensor.max_range / (sqrt(2) * sigma_hit)));
+    else
+        return 0.0f;
 }
 
 float Particle::prob_short(float z_star, float z)
@@ -179,12 +179,14 @@ float Particle::prob_rand(float z_star, float z)
 }
 
 // Iterate over scan beams and update grid cells
-void Particle::update_map(float * r_array, float * theta_array, int array_size, float alpha)
+void Particle::update_map_raycasting(float * r_array, float * theta_array, int array_size, float alpha)
 {
+    // Calculate the position of the Lidar sensor in the world frame
+    float x = pose.x + sensor.x_offset * cos(pose.angle) - sensor.y_offset * sin(pose.angle);
+    float y = pose.y + sensor.x_offset * sin(pose.angle) + sensor.y_offset * cos(pose.angle);
+
     for (int i = 0; i < array_size; ++i)
     {
-        float x = pose.x + sensor.x_offset * cos(pose.angle) - sensor.y_offset * sin(pose.angle);
-        float y = pose.y + sensor.x_offset * sin(pose.angle) + sensor.y_offset * cos(pose.angle);
         float angle = pose.angle + sensor.angle_offset - theta_array[i];
 
         float x_step = cell_size * cos(angle);
@@ -209,4 +211,30 @@ void Particle::update_map(float * r_array, float * theta_array, int array_size, 
                 grid[x_index][y_index] += l_occ - l_0;
         }
     }   
+}
+
+// Iterate over grid cells and calculate the probability of occupancy
+void Particle::update_map_beam_model(float * r_array, float * theta_array, int array_size, float alpha, float beta)
+{
+    for (int i = 0; i < grid_size_x; ++i)
+    {
+        for (int j = 0; j < grid_size_y; ++j)
+        {
+            float x = i * cell_size;
+            float y = j * cell_size;
+
+            float r = sqrt(pow(x - pose.x - sensor.x_offset, 2) + pow(y - pose.y - sensor.y_offset, 2));
+            float phi = atan2(y - pose.y, x - pose.x) - pose.angle - sensor.angle_offset;
+
+            auto subtraction = [&phi = phi](float theta, float smallest) { return abs(phi - theta) < abs(phi - smallest);};
+            int k = std::min_element(theta_array, theta_array + array_size, subtraction) - theta_array;
+
+            if (r > std::min(sensor.max_range, r_array[k] + alpha/2.0f) || abs(phi-theta_array[k]) > beta/2.0f)
+                continue;
+            if (r < sensor.max_range && abs(r - r_array[k]) < alpha/2.0f)
+                grid[i][j] += l_occ - l_0;
+            if (r < r_array[k] - alpha/2.0f)
+                grid[i][j] += l_free - l_0;
+        }
+    }
 }
