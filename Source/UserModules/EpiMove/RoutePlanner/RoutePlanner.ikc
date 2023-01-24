@@ -14,8 +14,8 @@
 	</example>
 
 	<input name="SR_GRADIENT" description="Gradient of the successor representation at a given location in the grid" />
-	<input name="TARGET_POSITION" description="Position of navigation target" /> 
-	<input name="START_POSITION" description="Position of navigation start in grid cells" />
+	<input name="TARGET_POSITION" description="Position of navigation target" size="2" /> 
+	<input name="START_POSITION" description="Position of navigation start in grid cells" size="2" optional="true" />
 
 	<output name="ROUTE" description="Route from the centre of the grid to the maximum" />
 

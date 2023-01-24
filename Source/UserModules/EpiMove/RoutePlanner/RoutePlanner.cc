@@ -40,6 +40,8 @@ RoutePlanner::Init()
     io(target_position, target_position_size_x, "TARGET_POSITION");
     io(start_position, start_position_size_x, "START_POSITION");
 
+    set_array(start_position, 0, start_position_size_x); 
+
     // Set output matrix
     io(route, route_size_x, route_size_y, "ROUTE");
 }
@@ -47,10 +49,17 @@ RoutePlanner::Init()
 void
 RoutePlanner::Tick()
 {   
+    int pos_x, pos_y;
+    if (start_position != nullptr)
+    {
+        pos_x = start_position[1];
+        pos_y = start_position[0];  
+    } else {
+        pos_x = start_pos_x;
+        pos_y = start_pos_y;
+    }
+        
     set_matrix(route, 0, route_size_x, route_size_y);
-
-    int pos_x = start_position[1];
-    int pos_y = start_position[0];
 
     int counter = 0;
 
@@ -81,6 +90,15 @@ RoutePlanner::Tick()
         pos_x += max_x;
         pos_y += max_y;
         ++counter;
+    }
+}
+
+void RoutePlanner::Command(std::string s, float x, float y, std::string value)
+{
+    printf("Command: %s %f %f %s", s.c_str(), x, y, value.c_str());
+    if (s == "set_position") {
+        start_pos_x = x;
+        start_pos_y = y;
     }
 }
 

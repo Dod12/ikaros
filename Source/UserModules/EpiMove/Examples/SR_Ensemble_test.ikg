@@ -78,8 +78,8 @@
 		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Gridmap" direction = "horizontal" source = "Maze.OUTPUT" x = "10" y = "10" valueLow="0" valueHigh="1" command="RoutePlanner.set_position" />
 		<!--<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Transition Matrix" direction = "horizontal" source = "Transition.TRANSITION_MATRIX" x = "410" y = "10" valueLow="0" valueHigh="1" />
 		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Sucessor Representation" direction = "horizontal" source = "SRMean.MEAN_SR" x = "810" y = "10" />-->
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "10" y = "410" command="SRGradient.set_position" />
-		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Route Planner" direction = "horizontal" source = "RoutePlanner.ROUTE" x = "410" y = "410" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Successor Gradient" direction = "horizontal" source = "SRGradient.SR_GRADIENT" x = "410" y = "10" command="SRGradient.set_position" />
+		<grid width="400" height="400" show_title = "true" flipYAxis="no" flipYCanvas="no" title= "Route Planner" direction = "horizontal" source = "RoutePlanner.ROUTE" x = "810" y = "10" />
 	</view>
 
 </group>
